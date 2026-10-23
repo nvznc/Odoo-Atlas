@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_pos_prep_display" model="ir.actions.act_window">
+        <field name="name">Preparation Display</field>
+        <field name="res_model">pos.prep.display</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Create your first preparation screen</p>
+            <p>Choose the point of sale, products and stages shown on the kitchen screen.</p>
+        </field>
+    </record>
+
+    <record id="view_pos_prep_display_form" model="ir.ui.view">
+        <field name="name">pos.prep.display.form</field>
+        <field name="model">pos.prep.display</field>
+        <field name="arch" type="xml">
+            <form string="Preparation Display">
+                <header>
+                    <button name="open_preparation_screen" type="object" string="Preparation Screen" class="btn-primary"/>
+                    <button name="open_order_status_screen" type="object" string="Order Status Screen"/>
+                    <button name="reset_all_orders" type="object" string="Reset all orders" confirm="This removes all active orders from this screen. Continue?"/>
+                </header>
+                <sheet>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" placeholder="Kitchen screen"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="active" invisible="1"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="pos_config_ids" widget="many2many_tags" options="{'no_create': True}" placeholder="All points of sale"/>
+                            <field name="category_ids" widget="many2many_tags" options="{'no_create': True}" placeholder="All categories"/>
+                            <field name="contains_bar_restaurant" invisible="1"/>
+                        </group>
+                        <group>
+                            <label for="auto_clear"/>
+                            <div class="o_row">
+                                <field name="auto_clear"/>
+                                <label for="clear_time_interval" string="Clear after"/>
+                                <field name="clear_time_interval" class="oe_inline"/>
+                                <span>minutes</span>
+                            </div>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Stages" name="stages">
+                            <field name="stage_ids">
+                                <list editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="name"/>
+                                    <field name="color" widget="color"/>
+                                    <field name="alert_timer" string="Alert after (min)"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Public Screen" name="public_screen">
+                            <group>
+                                <field name="preparing_label"/>
+                                <field name="almost_ready_label"/>
+                                <field name="ready_label"/>
+                            </group>
+                            <div class="text-muted mt-3">
+                                The order status screen is public. Open it from the
+                                “Order Status Screen” button and use the generated link on the TV.
+                            </div>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_pos_prep_display_list" model="ir.ui.view">
+        <field name="name">pos.prep.display.list</field>
+        <field name="model">pos.prep.display</field>
+        <field name="arch" type="xml">
+            <list string="Preparation Displays">
+                <field name="name"/>
+                <field name="pos_config_ids" widget="many2many_tags"/>
+                <field name="category_ids" widget="many2many_tags"/>
+                <field name="stage_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
+                <field name="order_count"/>
+                <field name="average_time"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_pos_prep_display_search" model="ir.ui.view">
+        <field name="name">pos.prep.display.search</field>
+        <field name="model">pos.prep.display</field>
+        <field name="arch" type="xml">
+            <search string="Preparation Displays">
+                <field name="name"/>
+                <field name="pos_config_ids"/>
+                <filter name="active" string="Active" domain="[('active', '=', True)]"/>
+                <filter name="inactive" string="Archived" domain="[('active', '=', False)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_pos_prep_display_kanban" model="ir.ui.view">
+        <field name="name">pos.prep.display.kanban</field>
+        <field name="model">pos.prep.display</field>
+        <field name="arch" type="xml">
+            <kanban can_open="0">
+                <templates>
+                    <t t-name="menu">
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-6">
+                                    <a type="open">Configure</a>
+                                </div>
+                                <div class="col-6">
+                                    <a name="reset_all_orders" type="object">Reset all orders</a>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                    <t t-name="card">
+                        <field name="name" class="fw-bold fs-4 ms-2"/>
+                        <field name="stage_ids" widget="many2many_tags" options="{'color_field': 'color'}" class="ms-2"/>
+                        <div class="row pb-4 mt-4">
+                            <div name="card_left" class="col-12 col-sm-8 d-flex flex-row flex-wrap gap-1">
+                                <button class="btn btn-primary ms-1" name="open_preparation_screen" type="object">
+                                    Preparation Screen
+                                </button>
+                                <button class="btn btn-secondary ms-1" name="open_order_status_screen" type="object">
+                                    Order Status Screen
+                                </button>
+                            </div>
+                            <div class="col-12 col-sm-4">
+                                <div class="row g-0 text-end pe-1">
+                                    <div class="col-10"><span>In progress</span></div>
+                                    <div class="col-2"><field name="order_count"/></div>
+                                </div>
+                                <div class="row g-0 text-end pe-1">
+                                    <div class="col-10"><span>Average time</span></div>
+                                    <div class="col-2"><span><field name="average_time"/> min</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <menuitem
+        id="menu_pos_preparation_display"
+        name="Preparation Display"
+        parent="point_of_sale.menu_point_of_sale"
+        action="action_pos_prep_display"
+        sequence="90"
+    />
+</odoo>

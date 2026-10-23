@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="pos_preparation_display_atlas.OrderStatus">
+        <div class="o_status_screen">
+            <header class="o_status_header">
+                <div class="o_status_brand">
+                    <span class="o_status_brand_mark"/>
+                    <span t-esc="data.display_name || 'Estado de pedidos'"/>
+                </div>
+                <div class="o_status_clock">
+                    <span t-esc="clockLabel"/>
+                </div>
+            </header>
+            <main class="o_status_columns">
+                <StatusColumn
+                    t-foreach="columns"
+                    t-as="column"
+                    t-key="column.key"
+                    title="column.title"
+                    orders="column.orders"
+                    tone="column.tone"
+                />
+            </main>
+        </div>
+    </t>
+
+    <t t-name="pos_preparation_display_atlas.StatusColumn">
+        <section t-attf-class="o_status_column o_status_column_{{ props.tone }}">
+            <h2 class="o_status_column_title">
+                <span t-esc="props.title"/>
+                <span class="o_status_count" t-esc="props.orders.length"/>
+            </h2>
+            <div class="o_status_cards">
+                <div
+                    t-foreach="props.orders"
+                    t-as="order"
+                    t-key="order.id"
+                    class="o_status_card"
+                >
+                    <div class="o_status_number" t-esc="order.tracking_number || order.name"/>
+                    <div t-if="order.table" class="o_status_table">
+                        Mesa <t t-esc="order.table"/>
+                    </div>
+                    <div t-if="order.customer_count" class="o_status_guests">
+                        <t t-esc="order.customer_count"/> personas
+                    </div>
+                </div>
+                <div t-if="!props.orders.length" class="o_status_empty">
+                    Sin pedidos
+                </div>
+            </div>
+        </section>
+    </t>
+</templates>

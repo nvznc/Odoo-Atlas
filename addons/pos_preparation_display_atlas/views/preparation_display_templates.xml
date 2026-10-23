@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="prep_display_index" name="Preparation Display">
+        &lt;!DOCTYPE html&gt;
+        <html>
+            <head>
+                <title>Preparation Display</title>
+                <meta charset="utf-8"/>
+                <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
+                <link rel="shortcut icon" href="/point_of_sale/static/src/img/favicon.ico" type="image/x-icon"/>
+                <script type="text/javascript">
+                    var odoo = <t t-out="json.dumps({
+                        'csrf_token': request.csrf_token(None),
+                        '__session_info__': session_info,
+                        'prep_display': prep_display,
+                        'debug': debug,
+                    })"/>;
+                    document.title = odoo.prep_display.name;
+                </script>
+                <t t-call-assets="pos_preparation_display_atlas.assets"/>
+            </head>
+            <body/>
+        </html>
+    </template>
+
+    <template id="order_status_index" name="Order Status Screen">
+        &lt;!DOCTYPE html&gt;
+        <html>
+            <head>
+                <title>Order Status</title>
+                <meta charset="utf-8"/>
+                <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
+                <link rel="shortcut icon" href="/point_of_sale/static/src/img/favicon.ico" type="image/x-icon"/>
+                <script type="text/javascript">
+                    var odoo = <t t-out="json.dumps({
+                        'csrf_token': request.csrf_token(None),
+                        '__session_info__': session_info,
+                        'order_status': session_info,
+                        'initial_data': initial_data,
+                        'debug': debug,
+                    })"/>;
+                    document.title = odoo.order_status.prep_display.name;
+                </script>
+                <t t-call-assets="pos_order_status_atlas.assets"/>
+            </head>
+            <body/>
+        </html>
+    </template>
+</odoo>

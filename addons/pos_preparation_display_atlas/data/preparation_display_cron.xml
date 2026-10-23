@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="preparation_display_cleanup_cron" model="ir.cron">
+        <field name="name">Preparation Display: clean old orders</field>
+        <field name="model_id" ref="model_pos_prep_display"/>
+        <field name="state">code</field>
+        <field name="code">model._clean_preparation_data()</field>
+        <field name="user_id" ref="base.user_root"/>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="nextcall" eval="(DateTime.now() + timedelta(days=1)).strftime('%Y-%m-%d 03:00:00')"/>
+        <field name="active" eval="True"/>
+    </record>
+</odoo>

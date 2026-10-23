@@ -1,0 +1,8 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_pos_prep_display_user,pos.prep.display.user,model_pos_prep_display,point_of_sale.group_pos_user,1,0,0,0
+access_pos_prep_display_manager,pos.prep.display.manager,model_pos_prep_display,point_of_sale.group_pos_manager,1,1,1,1
+access_pos_prep_stage_user,pos.prep.stage.user,model_pos_prep_stage,point_of_sale.group_pos_user,1,0,0,0
+access_pos_prep_stage_manager,pos.prep.stage.manager,model_pos_prep_stage,point_of_sale.group_pos_manager,1,1,1,1
+access_pos_prep_order_user,pos.prep.order.user,model_pos_prep_order,point_of_sale.group_pos_user,1,1,1,1
+access_pos_prep_line_user,pos.prep.line.user,model_pos_prep_line,point_of_sale.group_pos_user,1,1,1,1
+access_pos_prep_state_user,pos.prep.state.user,model_pos_prep_state,point_of_sale.group_pos_user,1,1,1,1

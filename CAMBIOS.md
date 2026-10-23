@@ -494,3 +494,64 @@ curl -s -o /dev/null -w "%{http_code}\n" http://localhost:8069/web/database/sele
 - Variables de entorno de ejemplo: `.env.example`
 - Compose: `docker-compose.yml`
 - Repositorio: <https://github.com/nvznc/Odoo-Atlas>
+
+---
+
+## 11. Módulo POS Preparation Display (2026-10-23)
+
+Se agregó el addon local `addons/pos_preparation_display_atlas` (`19.0.1.0.0`,
+licencia `LGPL-3`) como implementación propia para Odoo 19 Community. No contiene
+código de Odoo Enterprise.
+
+### 11.1 Funcionalidad
+
+- Pantalla de cocina autenticada en `/pos_preparation_display/web?display_id=...`.
+- Pantalla pública de estado en `/pos-order-tracking?access_token=...`.
+- Columnas públicas: `Preparando`, `Casi Listo` y `Listo`.
+- Etapas por defecto: `Preparando`, `Listo` (penúltima) y `Completado`.
+- Avance manual por pedido, reinicio, completado, marque de líneas y reinicio global.
+- Temporizador por etapa, resaltado por `alert_timer`, notas, atributos, combos,
+  cantidades canceladas y auto-limpieza de la pantalla pública.
+- Activación por POS en Ajustes (`pos_prep_display_enabled`).
+- Filtro de categorías por pantalla; vacío significa todas las categorías.
+- Pedidos impagos: en POS no restaurante se envían durante `sync_from_ui`; en
+  restaurante al usar “Enviar a cocina”. Los pedidos pagados también se envían.
+- Sincronización en vivo por `pos.bus.mixin` (`LOAD_ORDERS` y `NEW_ORDERS`).
+- Botones “Preparation Screen” y “Order Status Screen” en el formulario y kanban.
+- Reglas multi-compañía y constraint `unique(pos_order_id)` en `pos.prep.order`.
+- Cron diario que elimina preparaciones antiguas cerradas o completadas.
+
+### 11.2 Archivos principales
+
+- `__manifest__.py`, `models/`, `controllers/main.py`, `views/`, `security/`.
+- `static/src/kitchen/`: pantalla de cocina.
+- `static/src/status/`: pantalla pública.
+- `static/src/pos/`: integración con el POS y categorías de preparación.
+- `tests/test_preparation_display.py`: 10 tests.
+
+### 11.3 Pruebas realizadas
+
+- Base clonada `odoo_prep_display_test`; producción **no** fue modificada.
+- Backup previo: `backups/odoo_before_prep_display_20261023_052237.dump`.
+- Instalación y upgrades correctos.
+- `10/10` tests OK (`--test-tags=/pos_preparation_display_atlas`).
+- Verificación HTTP: cocina `200`, pública `200`, JSON `200`, token inválido `404`.
+- Assets de cocina, estado y POS generados y validados con `node --check`.
+- Se confirmó que el bundle del POS carga `prep_display_enabled`, las categorías y
+  la pantalla `pos.prep.display`.
+
+Comando de upgrade/pruebas usado:
+
+```bash
+docker exec odoo sh -lc 'odoo -d odoo_prep_display_test -u pos_preparation_display_atlas \
+  --test-enable --stop-after-init --http-port=8070 \
+  --addons-path=/mnt/extra-addons,/usr/lib/python3/dist-packages/odoo/addons \
+  --db_host=db --db_port=5432 --db_user="$USER" --db_password="$PASSWORD" \
+  --log-level=test --test-tags=/pos_preparation_display_atlas 2>&1 | tail -120'
+```
+
+### 11.4 Pendientes
+
+1. Instalar el módulo en producción cuando se autorice.
+2. Probar la interacción real en navegador (bus, sonido y montaje Owl) en cocina y TV.
+3. Hacer commit local del addon; **no** se ha hecho push.

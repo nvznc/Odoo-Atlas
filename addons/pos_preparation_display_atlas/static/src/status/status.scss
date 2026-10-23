@@ -1,0 +1,180 @@
+.o_status_screen {
+    min-height: 100vh;
+    background: #0e1116;
+    color: #f8fafc;
+    display: flex;
+    flex-direction: column;
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    overflow: hidden;
+}
+
+.o_status_header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.2vh 2vw;
+    background: #151a22;
+    border-bottom: 1px solid #2a3341;
+    font-size: clamp(1rem, 1.5vw, 2rem);
+}
+
+.o_status_brand {
+    display: flex;
+    align-items: center;
+    gap: 0.7vw;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+}
+
+.o_status_brand_mark {
+    width: 1.1vw;
+    height: 1.1vw;
+    min-width: 0.7rem;
+    min-height: 0.7rem;
+    border-radius: 50%;
+    background: #4d89d1;
+}
+
+.o_status_clock {
+    font-variant-numeric: tabular-nums;
+    color: #94a3b8;
+    font-weight: 700;
+}
+
+.o_status_columns {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.1vw;
+    padding: 1.2vh 1.2vw 1.5vh;
+    min-height: 0;
+}
+
+.o_status_column {
+    background: #151a22;
+    border: 1px solid #2a3341;
+    border-radius: 1vw;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.o_status_column_preparing {
+    border-top: 0.7vh solid #6c757d;
+}
+
+.o_status_column_almost {
+    border-top: 0.7vh solid #d69e2e;
+}
+
+.o_status_column_ready {
+    border-top: 0.7vh solid #4ea82a;
+}
+
+.o_status_column_title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0;
+    padding: 1.4vh 1.1vw 1vh;
+    font-size: clamp(1.4rem, 2.8vw, 3.6rem);
+    font-weight: 900;
+    letter-spacing: 0.01em;
+}
+
+.o_status_column_preparing .o_status_column_title {
+    color: #cbd5e1;
+}
+
+.o_status_column_almost .o_status_column_title {
+    color: #f6c05c;
+}
+
+.o_status_column_ready .o_status_column_title {
+    color: #78d64b;
+}
+
+.o_status_count {
+    min-width: 2.2vw;
+    border-radius: 999px;
+    padding: 0.15vh 0.55vw;
+    background: #26303d;
+    color: #cbd5e1;
+    font-size: clamp(1rem, 1.5vw, 2rem);
+    text-align: center;
+}
+
+.o_status_cards {
+    flex: 1;
+    overflow: auto;
+    padding: 0 1.1vw 1.2vh;
+    display: flex;
+    flex-direction: column;
+    gap: 0.9vh;
+}
+
+.o_status_card {
+    background: #1d2531;
+    border: 1px solid #344052;
+    border-radius: 0.7vw;
+    padding: 1.3vh 1vw;
+    text-align: center;
+}
+
+.o_status_column_ready .o_status_card {
+    background: #14351d;
+    border-color: #2e6b34;
+}
+
+.o_status_column_almost .o_status_card {
+    background: #332a15;
+    border-color: #6b5526;
+}
+
+.o_status_number {
+    font-size: clamp(2.4rem, 5.4vw, 7.5rem);
+    line-height: 0.95;
+    font-weight: 900;
+    font-variant-numeric: tabular-nums;
+    word-break: break-word;
+}
+
+.o_status_column_ready .o_status_number {
+    color: #9cf06f;
+}
+
+.o_status_column_almost .o_status_number {
+    color: #ffd479;
+}
+
+.o_status_table {
+    margin-top: 0.8vh;
+    font-size: clamp(1.1rem, 2vw, 2.8rem);
+    font-weight: 700;
+    color: #e2e8f0;
+}
+
+.o_status_guests {
+    margin-top: 0.3vh;
+    color: #94a3b8;
+    font-size: clamp(0.8rem, 1.1vw, 1.5rem);
+}
+
+.o_status_empty {
+    color: #64748b;
+    text-align: center;
+    font-size: clamp(0.9rem, 1.3vw, 1.8rem);
+    padding: 3vh 1vw;
+}
+
+@media (max-width: 900px) {
+    .o_status_columns {
+        grid-template-columns: 1fr;
+        overflow: auto;
+    }
+
+    .o_status_column {
+        min-height: 30vh;
+    }
+}
