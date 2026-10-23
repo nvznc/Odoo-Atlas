@@ -1,4 +1,4 @@
-import { Component, whenReady } from "@odoo/owl";
+import { Component, useState, whenReady } from "@odoo/owl";
 import { mountComponent } from "@web/env";
 import { useOrderStatus } from "./status_service";
 
@@ -17,10 +17,7 @@ export class OrderStatusApp extends Component {
 
     setup() {
         this.orderStatus = useOrderStatus();
-    }
-
-    get state() {
-        return this.orderStatus.state;
+        this.state = useState(this.orderStatus.state);
     }
 
     get data() {

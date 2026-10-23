@@ -1,4 +1,4 @@
-import { Component, whenReady } from "@odoo/owl";
+import { Component, useState, whenReady } from "@odoo/owl";
 import { mountComponent } from "@web/env";
 import { usePreparationDisplay } from "./kitchen_service";
 
@@ -11,6 +11,11 @@ export class OrderCard extends Component {
 
     setup() {
         this.preparationDisplay = usePreparationDisplay();
+        this.state = useState(this.preparationDisplay.state);
+    }
+
+    get order() {
+        return this.props.order;
     }
 
     get elapsedMinutes() {
@@ -31,14 +36,14 @@ export class OrderCard extends Component {
     }
 
     get isLate() {
-        const stage = this.preparationDisplay.state.stages.find(
+        const stage = this.state.stages.find(
             (item) => item.id === this.props.order.stage_id
         );
         return Boolean(stage?.alert_timer) && this.elapsedMinutes >= stage.alert_timer;
     }
 
     get lastStage() {
-        const stages = this.preparationDisplay.state.stages;
+        const stages = this.state.stages;
         return stages[stages.length - 1];
     }
 
@@ -76,10 +81,7 @@ export class PreparationDisplayApp extends Component {
 
     setup() {
         this.preparationDisplay = usePreparationDisplay();
-    }
-
-    get state() {
-        return this.preparationDisplay.state;
+        this.state = useState(this.preparationDisplay.state);
     }
 
     get stages() {

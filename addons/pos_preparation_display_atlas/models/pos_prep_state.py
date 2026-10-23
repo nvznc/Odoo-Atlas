@@ -26,5 +26,6 @@ class PosPrepState(models.Model):
         if not state:
             return False
         state.todo = not state.todo
-        state.stage_id.prep_display_id._send_load_orders_message()
-        return state.todo
+        display = state.stage_id.prep_display_id
+        display._send_load_orders_message()
+        return display.get_display_data()

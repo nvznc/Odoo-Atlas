@@ -120,7 +120,7 @@ class PosPrepOrder(models.Model):
             delta = now - prep_order.pos_order_id.create_date
             prep_order.completion_time = max(0, int(delta.total_seconds() / 60))
         display._send_load_orders_message()
-        return True
+        return display.get_display_data()
 
     @api.model
     def reset_order(self, prep_order_id, display_id):
@@ -141,7 +141,7 @@ class PosPrepOrder(models.Model):
         )
         prep_order.completion_time = 0
         display._send_load_orders_message()
-        return True
+        return display.get_display_data()
 
     @api.model
     def complete_order(self, prep_order_id, display_id):
@@ -167,4 +167,4 @@ class PosPrepOrder(models.Model):
             delta = now - prep_order.pos_order_id.create_date
             prep_order.completion_time = max(0, int(delta.total_seconds() / 60))
         display._send_load_orders_message()
-        return True
+        return display.get_display_data()

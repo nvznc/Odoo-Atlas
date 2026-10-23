@@ -441,13 +441,17 @@ class PosPrepDisplay(models.Model):
             return False
         return display._get_public_orders()
 
-    def reset_all_orders(self):
+    def reset_all_orders(self, return_data=False):
+        data = False
         for display in self:
             states = self.env["pos.prep.state"].search(
                 [("stage_id", "in", display.stage_ids.ids)]
             )
             states.unlink()
             display._send_load_orders_message()
+            if return_data:
+                data = display.get_display_data()
+        return data or True
 
     def open_preparation_screen(self):
         self.ensure_one()

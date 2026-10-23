@@ -18,10 +18,22 @@ const preparationDisplayService = {
         const displayId = odoo.prep_display.id;
         const accessToken = odoo.prep_display.access_token;
 
+        let loadSequence = 0;
+        const applyData = (data) => {
+            loadSequence++;
+            state.display = data.display;
+            state.stages = data.stages;
+            state.orders = data.orders;
+            state.loading = false;
+        };
         const load = async () => {
+            const sequence = ++loadSequence;
             const data = await orm.call("pos.prep.display", "get_display_data", [
                 [displayId],
             ]);
+            if (sequence !== loadSequence) {
+                return;
+            }
             state.display = data.display;
             state.stages = data.stages;
             state.orders = data.orders;
@@ -54,36 +66,39 @@ const preparationDisplayService = {
             load,
             notification,
             async advance(order, direction = 1) {
-                await orm.call("pos.prep.order", "advance_order", [
+                const data = await orm.call("pos.prep.order", "advance_order", [
                     order.id,
                     displayId,
                     direction,
                 ]);
-                await load();
+                applyData(data);
             },
             async reset(order) {
-                await orm.call("pos.prep.order", "reset_order", [
+                const data = await orm.call("pos.prep.order", "reset_order", [
                     order.id,
                     displayId,
                 ]);
-                await load();
+                applyData(data);
             },
             async complete(order) {
-                await orm.call("pos.prep.order", "complete_order", [
+                const data = await orm.call("pos.prep.order", "complete_order", [
                     order.id,
                     displayId,
                 ]);
-                await load();
+                applyData(data);
             },
             async toggleLine(line) {
-                await orm.call("pos.prep.state", "toggle_state", [line.state_id]);
-                await load();
+                const data = await orm.call("pos.prep.state", "toggle_state", [
+                    line.state_id,
+                ]);
+                applyData(data);
             },
             async resetAll() {
-                await orm.call("pos.prep.display", "reset_all_orders", [
+                const data = await orm.call("pos.prep.display", "reset_all_orders", [
                     [displayId],
+                    true,
                 ]);
-                await load();
+                applyData(data);
             },
         };
     },

@@ -24,7 +24,9 @@ const orderStatusService = {
             now: Date.now(),
         });
 
+        let loadSequence = 0;
         const load = async () => {
+            const sequence = ++loadSequence;
             const response = await fetch(
                 `/pos-order-tracking/data?access_token=${encodeURIComponent(accessToken)}`,
                 { headers: { Accept: "application/json" } }
@@ -32,7 +34,11 @@ const orderStatusService = {
             if (!response.ok) {
                 return;
             }
-            state.data = await response.json();
+            const data = await response.json();
+            if (sequence !== loadSequence) {
+                return;
+            }
+            state.data = data;
             state.loading = false;
         };
 
