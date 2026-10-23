@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_pos_pos_form_bcv" model="ir.ui.view">
+        <field name="name">pos.order.form.bcv</field>
+        <field name="model">pos.order</field>
+        <field name="inherit_id" ref="point_of_sale.view_pos_pos_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='products']//group[@name='order_total']" position="inside">
+                <field name="bcv_currency_id" invisible="1"/>
+                <field name="bcv_rate" readonly="1"/>
+                <field name="bcv_amount_total" widget="monetary" readonly="1"/>
+            </xpath>
+            <xpath expr="//page[@name='payments']//field[@name='payment_ids']/list/field[@name='amount']" position="after">
+                <field name="payment_currency_id" options="{'no_create': True}"/>
+                <field name="payment_amount" widget="monetary"/>
+                <field name="payment_rate"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_pos_order_tree_bcv" model="ir.ui.view">
+        <field name="name">pos.order.list.bcv</field>
+        <field name="model">pos.order</field>
+        <field name="inherit_id" ref="point_of_sale.view_pos_order_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='amount_total']" position="after">
+                <field name="bcv_rate" optional="hide"/>
+                <field name="bcv_amount_total" optional="hide" widget="monetary"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

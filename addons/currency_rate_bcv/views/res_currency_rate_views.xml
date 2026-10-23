@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_currency_rate_tree_bcv" model="ir.ui.view">
+        <field name="name">res.currency.rate.list.bcv</field>
+        <field name="model">res.currency.rate</field>
+        <field name="inherit_id" ref="base.view_currency_rate_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//list" position="inside">
+                <header>
+                    <button name="action_update_bcv_rate"
+                            type="object"
+                            string="Actualizar BCV"
+                            class="btn-primary"
+                            icon="fa-refresh"
+                            groups="account.group_account_manager"/>
+                </header>
+            </xpath>
+            <xpath expr="//field[@name='name']" position="after">
+                <field name="source"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_currency_rate_form_bcv" model="ir.ui.view">
+        <field name="name">res.currency.rate.form.bcv</field>
+        <field name="model">res.currency.rate</field>
+        <field name="inherit_id" ref="base.view_currency_rate_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='name']" position="after">
+                <field name="source"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

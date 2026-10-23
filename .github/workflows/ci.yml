@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install Ruff
+        run: pip install "ruff==0.17.2"
+      - name: Ruff check
+        run: ruff check .
+      - name: Ruff format check
+        run: ruff format --check .
+      - name: Compile addons
+        run: python -m compileall addons
+
+  odoo-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: postgres
+          POSTGRES_USER: odoo
+          POSTGRES_PASSWORD: odoo
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U odoo -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    steps:
+      - uses: actions/checkout@v4
+      # The Odoo container joins the runner host network so it can reach the
+      # PostgreSQL service published by the runner on 127.0.0.1:5432.
+      - name: Run Odoo tests
+        env:
+          ADDONS_PATH: ${{ github.workspace }}/addons
+        run: |
+          docker run --rm --network host \
+            -e HOST=127.0.0.1 \
+            -e PORT=5432 \
+            -e USER=odoo \
+            -e PASSWORD=odoo \
+            -v "${ADDONS_PATH}:/mnt/extra-addons" \
+            odoo:19.0 \
+            odoo -d odoo_test \
+              -i currency_rate_bcv,pos_bcv_multi_currency \
+              --test-enable \
+              --log-level=test \
+              --stop-after-init

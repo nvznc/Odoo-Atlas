@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-inherit="point_of_sale.OrderReceipt" t-inherit-mode="extension">
+        <xpath expr="//div[hasclass('receipt-total')]" position="after">
+            <div t-if="order.hasBcv" class="pos-receipt-amount receipt-total-bcv fw-bolder">
+                <span class="label-total">Total Bs</span>
+                <span t-out="order.bcvTotalDisplay" class="pos-receipt-right-align font-monospace"/>
+            </div>
+        </xpath>
+        <xpath expr="//div[hasclass('paymentlines')]/span[hasclass('pos-receipt-right-align')]" position="after">
+            <t t-if="line.isBcv()">
+                <div class="pos-receipt-amount receipt-payment-bcv text-muted">
+                    <span><t t-esc="line.payment_method_id.name"/> Bs</span>
+                    <span t-out="line.formattedPaymentAmount" class="pos-receipt-right-align font-monospace"/>
+                </div>
+            </t>
+        </xpath>
+        <xpath expr="//div[hasclass('receipt-change')]" position="after">
+            <div t-if="order.hasBcv and order.showChange" class="pos-receipt-amount receipt-change-bcv text-muted">
+                <span class="label-change">Change Bs</span>
+                <span t-out="order.bcvChangeDisplay" class="pos-receipt-right-align font-monospace"/>
+            </div>
+        </xpath>
+    </t>
+</templates>

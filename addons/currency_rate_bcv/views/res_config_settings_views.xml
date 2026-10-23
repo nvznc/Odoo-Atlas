@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_bcv" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.bcv</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="account.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//setting[@id='update_exchange_rates']" position="replace">
+                <setting id="update_exchange_rates"
+                         string="Tasa de cambio BCV"
+                         help="Actualiza la tasa oficial VES/USD desde bcv.org.ve">
+                    <div class="content-group">
+                        <div class="mt8">
+                            <button name="action_update_bcv_rate"
+                                    type="object"
+                                    string="Actualizar ahora"
+                                    class="btn-primary"
+                                    icon="fa-refresh"/>
+                        </div>
+                        <div class="text-muted mt8" invisible="not currency_rate_bcv_last_sync">
+                            Último intento: <field name="currency_rate_bcv_last_sync" readonly="1"/>
+                        </div>
+                        <div class="mt8" invisible="not currency_rate_bcv_last_message">
+                            <field name="currency_rate_bcv_last_message" readonly="1"/>
+                        </div>
+                    </div>
+                </setting>
+            </xpath>
+        </field>
+    </record>
+</odoo>

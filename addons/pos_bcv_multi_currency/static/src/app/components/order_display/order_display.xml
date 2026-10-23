@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-inherit="point_of_sale.OrderDisplay" t-inherit-mode="extension">
+        <xpath expr="//div[hasclass('order-summary')]/div[hasclass('d-flex')][hasclass('fs-3')]" position="after">
+            <div t-if="order.hasBcv" class="d-flex justify-content-between w-100 fs-5 text-muted">
+                <span>Total Bs</span>
+                <span t-esc="order.bcvTotalDisplay" class="total-bcv"/>
+            </div>
+        </xpath>
+    </t>
+</templates>

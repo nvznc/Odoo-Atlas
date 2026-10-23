@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_pos_session_form_bcv" model="ir.ui.view">
+        <field name="name">pos.session.form.bcv</field>
+        <field name="model">pos.session</field>
+        <field name="inherit_id" ref="point_of_sale.view_pos_session_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet/group" position="after">
+                <group string="BCV" invisible="not config_id.bcv_enabled">
+                    <group>
+                        <field name="bcv_rate" readonly="1"/>
+                        <field name="bcv_rate_date" readonly="1"/>
+                        <field name="bcv_rate_source" readonly="1"/>
+                    </group>
+                    <group invisible="not bcv_cash_control">
+                        <field name="bcv_cash_control" invisible="1"/>
+                        <field name="bcv_cash_journal_id" readonly="1"/>
+                        <field name="cash_register_balance_start_bcv" readonly="1"/>
+                        <field name="cash_register_balance_end_real_bcv" readonly="1"/>
+                        <field name="cash_register_balance_end_bcv" readonly="1"/>
+                        <field name="cash_register_difference_bcv" readonly="1"/>
+                    </group>
+                    <div>
+                        <button name="action_refresh_bcv_rate" type="object" string="Actualizar tasa BCV" class="btn btn-secondary"/>
+                    </div>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_pos_session_tree_bcv" model="ir.ui.view">
+        <field name="name">pos.session.list.bcv</field>
+        <field name="model">pos.session</field>
+        <field name="inherit_id" ref="point_of_sale.view_pos_session_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='state']" position="before">
+                <field name="bcv_rate" optional="hide"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

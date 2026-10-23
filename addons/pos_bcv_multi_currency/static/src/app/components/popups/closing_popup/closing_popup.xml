@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-inherit="point_of_sale.ClosePosPopup" t-inherit-mode="extension">
+        <xpath expr="//div[hasclass('payment-methods-overview')]" position="inside">
+            <div t-if="props.bcv_cash_details" class="w-100 mb-3">
+                <t t-set="bcvDiff" t-value="getDifference(props.bcv_cash_details.id)"/>
+                <t t-set="bcvCounted" t-value="state.payments[props.bcv_cash_details.id]?.counted || '0'"/>
+                <div class="d-flex align-items-center justify-content-between fs-3">
+                    <span t-esc="props.bcv_cash_details.name"/>
+                    <span t-esc="formatBcv(props.bcv_cash_details.amount)"/>
+                </div>
+                <div class="d-flex align-items-center justify-content-between text-muted border-start ps-2">
+                    <span>Opening</span>
+                    <span t-esc="formatBcv(props.bcv_cash_details.opening)"/>
+                </div>
+                <div t-if="props.bcv_cash_details.payment_amount" class="d-flex align-items-center justify-content-between text-muted border-start ps-2">
+                    <span>Payments in <t t-esc="props.bcv_cash_details.name"/></span>
+                    <span t-esc="formatBcv(Math.abs(props.bcv_cash_details.payment_amount))"/>
+                </div>
+                <div class="d-flex align-items-center justify-content-between text-muted border-start ps-2">
+                    <span>Counted</span>
+                    <span t-esc="formatBcv(env.utils.parseValidFloat(bcvCounted))"/>
+                </div>
+                <div class="d-flex align-items-center justify-content-between text-muted border-start ps-2" t-att-class="{'text-danger fw-bold': bcvDiff}">
+                    <span>Difference</span>
+                    <span class="cash-difference" t-esc="formatBcv(bcvDiff)"/>
+                </div>
+                <label class="form-label mt-2">Cash Count Bs</label>
+                <div class="d-flex w-100 gap-2 mt-1">
+                    <Input tModel="[state.payments[props.bcv_cash_details.id], 'counted']"
+                        isValid.bind="env.utils.isValidFloat" class="'cash-input w-100'"/>
+                    <button class="icon fa fa-clone btn btn-secondary" t-on-click="autoFillBcvCount"/>
+                </div>
+            </div>
+        </xpath>
+    </t>
+</templates>

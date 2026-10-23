@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-inherit="point_of_sale.OpeningControlPopup" t-inherit-mode="extension">
+        <xpath expr="//div[hasclass('opening-cash-section')]" position="after">
+            <div class="opening-cash-section mb-3" t-if="hasBcvCash">
+                <label class="form-label">Opening cash Bs</label>
+                <div t-att-class="{ 'w-50': !ui.isSmall }" class="cash-input-sub-section d-flex gap-1">
+                    <Input tModel="[state, 'openingCashBcv']"
+                        isValid.bind="env.utils.isValidFloat"
+                        placeholder.translate="Opening Balance Bs Eg: 12345"/>
+                </div>
+            </div>
+        </xpath>
+    </t>
+</templates>

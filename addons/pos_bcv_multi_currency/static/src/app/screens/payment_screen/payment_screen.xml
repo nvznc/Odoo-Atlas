@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-inherit="point_of_sale.PaymentScreenDue" t-inherit-mode="extension">
+        <xpath expr="//div[hasclass('total')]" position="after">
+            <div t-if="currentOrder.hasBcv" class="text-center text-muted mt-1"
+                t-att-style="!ui.isSmall ? 'font-size: 3rem;' : 'font-size: 1.5rem;'">
+                <t t-esc="currentOrder.bcvRemainingDueDisplay"/>
+            </div>
+        </xpath>
+    </t>
+
+    <t t-inherit="point_of_sale.PaymentScreenPaymentLines" t-inherit-mode="extension">
+        <xpath expr="//div[hasclass('payment-amount')]/PriceFormatter" position="before">
+            <div t-if="line.isVes()" class="text-end lh-sm">
+                <div t-esc="line.formattedPaymentAmount"/>
+                <small class="text-muted" t-esc="line.formattedUsdAmount"/>
+            </div>
+        </xpath>
+        <xpath expr="//div[hasclass('payment-amount')]/PriceFormatter" position="attributes">
+            <attribute name="t-if">!line.isVes()</attribute>
+        </xpath>
+    </t>
+</templates>
