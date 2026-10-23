@@ -540,6 +540,18 @@ código de Odoo Enterprise.
 - Assets de cocina, estado y POS generados y validados con `node --check`.
 - Se confirmó que el bundle del POS carga `prep_display_enabled`, las categorías y
   la pantalla `pos.prep.display`.
+- Prueba real en Firefox headless con WebDriver sobre la base de prueba:
+  - cocina renderizada con pedido, tabs, etapas, líneas y botones;
+  - temporizador actualizado cada segundo;
+  - `Avanzar`, `Completar` y `Reiniciar` actualizan etapa, tabs y tarjeta;
+  - marcar/desmarcar línea persiste al recargar y `Reiniciar` la restaura;
+  - `Reiniciar todo` deja la pantalla vacía y actualiza la pantalla pública;
+  - la pantalla pública muestra solo `Preparando`, `Casi Listo` y `Listo`, y
+    recibe el cambio por bus sin recargar la página.
+- Corrección de reactividad Owl: los componentes que consumen el estado de los
+  servicios usan `useState(service.state)`, de modo que las mutaciones del estado
+  notifican y vuelven a renderizar. También se añadió secuencia de carga para
+  ignorar respuestas antiguas.
 
 Comando de upgrade/pruebas usado:
 
@@ -554,5 +566,6 @@ docker exec odoo sh -lc 'odoo -d odoo_prep_display_test -u pos_preparation_displ
 ### 11.4 Pendientes
 
 1. Instalar el módulo en producción cuando se autorice.
-2. Probar la interacción real en navegador (bus, sonido y montaje Owl) en cocina y TV.
-3. El addon quedó en el commit local `cbb6e7b`; **no** se ha hecho push.
+2. Probar la interacción real en la TV/terminal definitiva (sonido, tamaños y red local).
+3. El addon y sus correcciones quedaron en commits locales (`cbb6e7b`, `ab20c2f`,
+   `4467a98`); **no** se ha hecho push.
