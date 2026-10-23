@@ -7,7 +7,7 @@ cómo se probó, cómo se desplegó y cómo se subió a GitHub.
 - **Repositorio:** <https://github.com/nvznc/Odoo-Atlas>
 - **Remoto SSH:** `git@github.com:nvznc/Odoo-Atlas.git`
 - **Rama:** `main`
-- **Último commit de código:** `f397f6f`
+- **Último commit de código:** `cbb6e7b`
 - **Producción:** Odoo `19.0-20261015`, base de datos `odoo`
 - **Estado:** contenedores healthy, HTTP 200, módulo POS en `19.0.1.0.2`
 
@@ -471,6 +471,7 @@ curl -s -o /dev/null -w "%{http_code}\n" http://localhost:8069/web/database/sele
 - `pos_bcv_multi_currency` en `19.0.1.0.2`.
 - `currency_rate_bcv` en `19.0.1.0.0`.
 - Último commit de código en GitHub: `f397f6f`.
+- `pos_preparation_display_atlas` está instalado solo en la base de prueba; aún no en producción.
 - El bundle del POS con la corrección es `/web/assets/9f12006/point_of_sale._assets_pos.min.js`.
 - Los tests de Python siguen en 14/14.
 
@@ -554,4 +555,4 @@ docker exec odoo sh -lc 'odoo -d odoo_prep_display_test -u pos_preparation_displ
 
 1. Instalar el módulo en producción cuando se autorice.
 2. Probar la interacción real en navegador (bus, sonido y montaje Owl) en cocina y TV.
-3. Hacer commit local del addon; **no** se ha hecho push.
+3. El addon quedó en el commit local `cbb6e7b`; **no** se ha hecho push.
