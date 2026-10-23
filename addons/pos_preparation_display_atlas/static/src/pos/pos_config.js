@@ -8,7 +8,7 @@ patch(PosConfig.prototype, {
         return new Set(
             displays.flatMap((display) =>
                 display.category_ids.length
-                    ? display.category_ids
+                    ? display.category_ids.map((category) => category.id)
                     : allCategories.map((category) => category.id)
             )
         );
