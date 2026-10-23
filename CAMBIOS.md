@@ -552,6 +552,16 @@ código de Odoo Enterprise.
   servicios usan `useState(service.state)`, de modo que las mutaciones del estado
   notifican y vuelven a renderizar. También se añadió secuencia de carga para
   ignorar respuestas antiguas.
+- Flujo real del POS Restaurante en la base de prueba:
+  - pedido creado en mesa `T101` y `Enviar` lo registró en la pantalla de cocina
+    y en la TV **antes de cobrar**;
+  - el pedido pagado conservó una sola preparación (sin duplicados);
+  - otro pedido en `T102` se creó, envió y cobró correctamente;
+  - desde cocina, `Avanzar` movió `T102` a `Listo` en la TV y `Completar` lo
+    retiró de la pantalla pública.
+- Se corrigió `pos_config.js`: `preparationCategories` debe contener IDs de
+  categorías, no registros. Sin esta corrección el POS no detectaba cambios de
+  líneas y no mostraba el botón `Enviar`.
 
 Comando de upgrade/pruebas usado:
 
@@ -568,4 +578,4 @@ docker exec odoo sh -lc 'odoo -d odoo_prep_display_test -u pos_preparation_displ
 1. Instalar el módulo en producción cuando se autorice.
 2. Probar la interacción real en la TV/terminal definitiva (sonido, tamaños y red local).
 3. El addon y sus correcciones quedaron en commits locales (`cbb6e7b`, `ab20c2f`,
-   `4467a98`); **no** se ha hecho push.
+   `4467a98`, `d562107`); **no** se ha hecho push.
