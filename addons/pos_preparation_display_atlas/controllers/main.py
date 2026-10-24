@@ -1,12 +1,13 @@
 import json
 
 import werkzeug
-
 from odoo import http
 from odoo.http import request
 
 
 class PosPreparationDisplayController(http.Controller):
+    """Serve kitchen and public preparation display routes."""
+
     def _get_display_by_id(self, display_id):
         try:
             display_id = int(display_id)
@@ -36,6 +37,7 @@ class PosPreparationDisplayController(http.Controller):
         methods=["GET"],
     )
     def preparation_display(self, display_id=None, **kwargs):
+        """Render the authenticated kitchen screen."""
         display = self._get_display_by_id(display_id)
         if not display:
             raise werkzeug.exceptions.NotFound()
@@ -61,6 +63,7 @@ class PosPreparationDisplayController(http.Controller):
         methods=["GET"],
     )
     def order_status_display(self, access_token=None, **kwargs):
+        """Render the public order status screen."""
         display = self._get_display_by_token(access_token)
         if not display:
             raise werkzeug.exceptions.NotFound()
@@ -92,6 +95,7 @@ class PosPreparationDisplayController(http.Controller):
         csrf=False,
     )
     def order_status_data(self, access_token=None, **kwargs):
+        """Return the public order status payload as JSON."""
         display = self._get_display_by_token(access_token)
         if not display:
             raise werkzeug.exceptions.NotFound()

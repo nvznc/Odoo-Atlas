@@ -2,6 +2,8 @@ from odoo import api, models
 
 
 class PosSession(models.Model):
+    """Load preparation displays with the POS session data."""
+
     _inherit = "pos.session"
 
     @api.model

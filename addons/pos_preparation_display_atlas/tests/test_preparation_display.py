@@ -71,9 +71,7 @@ class TestPreparationDisplay(TransactionCase):
 
     def _process_order(self, order, options=None):
         self.env["pos.prep.order"].process_order(order.id, options or {})
-        return self.env["pos.prep.order"].search(
-            [("pos_order_id", "=", order.id)], limit=1
-        )
+        return self.env["pos.prep.order"].search([("pos_order_id", "=", order.id)], limit=1)
 
     def test_default_stages_and_labels(self):
         stages = self.display.stage_ids.sorted(lambda stage: stage.sequence)
@@ -83,9 +81,7 @@ class TestPreparationDisplay(TransactionCase):
         self.assertEqual(self.display.ready_label, "Listo")
 
     def test_only_matching_categories_are_sent(self):
-        order = self._create_order(
-            [(self.product_food, 2), (self.product_drink, 1)]
-        )
+        order = self._create_order([(self.product_food, 2), (self.product_drink, 1)])
         prep_order = self._process_order(order)
         self.assertTrue(prep_order)
         self.assertEqual(len(prep_order.prep_line_ids), 1)
@@ -100,9 +96,7 @@ class TestPreparationDisplay(TransactionCase):
         order = self._create_order([(self.product_food, 1)])
         self._process_order(order)
         self._process_order(order)
-        prep_orders = self.env["pos.prep.order"].search(
-            [("pos_order_id", "=", order.id)]
-        )
+        prep_orders = self.env["pos.prep.order"].search([("pos_order_id", "=", order.id)])
         self.assertEqual(len(prep_orders), 1)
         self.assertEqual(len(prep_orders.prep_line_ids), 1)
         self.assertEqual(len(prep_orders.prep_line_ids.state_ids), 1)
@@ -137,35 +131,23 @@ class TestPreparationDisplay(TransactionCase):
         state = prep_order.prep_line_ids.state_ids
         stages = self.display.stage_ids.sorted(lambda stage: stage.sequence)
 
-        self.env["pos.prep.order"].advance_order(
-            prep_order.id, self.display.id, 1
-        )
+        self.env["pos.prep.order"].advance_order(prep_order.id, self.display.id, 1)
         self.assertEqual(state.stage_id, stages[1])
 
-        self.env["pos.prep.order"].complete_order(
-            prep_order.id, self.display.id
-        )
+        self.env["pos.prep.order"].complete_order(prep_order.id, self.display.id)
         self.assertEqual(state.stage_id, stages[2])
         self.assertFalse(state.todo)
         self.assertGreaterEqual(prep_order.completion_time, 0)
 
-        self.env["pos.prep.order"].reset_order(
-            prep_order.id, self.display.id
-        )
+        self.env["pos.prep.order"].reset_order(prep_order.id, self.display.id)
         self.assertEqual(state.stage_id, stages[0])
         self.assertTrue(state.todo)
 
     def test_table_label_includes_merged_tables(self):
         floor = self.env["restaurant.floor"].create({"name": "Test Floor"})
-        table_1 = self.env["restaurant.table"].create(
-            {"floor_id": floor.id, "table_number": 1}
-        )
-        table_2 = self.env["restaurant.table"].create(
-            {"floor_id": floor.id, "table_number": 2}
-        )
-        table_3 = self.env["restaurant.table"].create(
-            {"floor_id": floor.id, "table_number": 3}
-        )
+        table_1 = self.env["restaurant.table"].create({"floor_id": floor.id, "table_number": 1})
+        table_2 = self.env["restaurant.table"].create({"floor_id": floor.id, "table_number": 2})
+        table_3 = self.env["restaurant.table"].create({"floor_id": floor.id, "table_number": 3})
         order = self._create_order([(self.product_food, 1)], table=table_2)
         prep_order = self._process_order(order)
 
@@ -183,9 +165,7 @@ class TestPreparationDisplay(TransactionCase):
         self.assertEqual(prep_order._get_table_label(), "1 y 2 y 3")
 
     def test_public_screen_three_columns(self):
-        order = self._create_order(
-            [(self.product_food, 1), (self.product_food, 1)]
-        )
+        order = self._create_order([(self.product_food, 1), (self.product_food, 1)])
         prep_order = self._process_order(order)
         stages = self.display.stage_ids.sorted(lambda stage: stage.sequence)
         states = prep_order.prep_line_ids.state_ids
@@ -221,13 +201,9 @@ class TestPreparationDisplay(TransactionCase):
     def test_public_token(self):
         order = self._create_order([(self.product_food, 1)])
         self._process_order(order)
-        data = self.env["pos.prep.display"].get_order_status_data(
-            self.display.access_token
-        )
+        data = self.env["pos.prep.display"].get_order_status_data(self.display.access_token)
         self.assertTrue(data)
-        self.assertFalse(
-            self.env["pos.prep.display"].get_order_status_data("invalid-token")
-        )
+        self.assertFalse(self.env["pos.prep.display"].get_order_status_data("invalid-token"))
 
     def _ui_order_data(self, qty=1):
         uuid = str(uuid4())
@@ -240,7 +216,7 @@ class TestPreparationDisplay(TransactionCase):
             "date_order": fields.Datetime.to_string(fields.Datetime.now()),
             "fiscal_position_id": False,
             "pricelist_id": self.config.pricelist_id.id,
-            "name": "Order %s" % uuid,
+            "name": f"Order {uuid}",
             "last_order_preparation_change": "{}",
             "lines": [
                 (
@@ -273,9 +249,7 @@ class TestPreparationDisplay(TransactionCase):
         order = self.env["pos.order"].browse(result["pos.order"][0]["id"])
         self.assertEqual(order.state, "draft")
         self.assertEqual(order.amount_paid, 0.0)
-        prep_order = self.env["pos.prep.order"].search(
-            [("pos_order_id", "=", order.id)], limit=1
-        )
+        prep_order = self.env["pos.prep.order"].search([("pos_order_id", "=", order.id)], limit=1)
         self.assertTrue(prep_order)
         self.assertEqual(prep_order.prep_line_ids.quantity, 2)
         self.assertTrue(prep_order.prep_line_ids.state_ids)
@@ -284,9 +258,7 @@ class TestPreparationDisplay(TransactionCase):
         order_data = self._ui_order_data(1)
         result = self.env["pos.order"].sync_from_ui([order_data])
         order = self.env["pos.order"].browse(result["pos.order"][0]["id"])
-        prep_order = self.env["pos.prep.order"].search(
-            [("pos_order_id", "=", order.id)], limit=1
-        )
+        prep_order = self.env["pos.prep.order"].search([("pos_order_id", "=", order.id)], limit=1)
         self.assertTrue(prep_order)
 
         self.env["pos.order"].with_context(

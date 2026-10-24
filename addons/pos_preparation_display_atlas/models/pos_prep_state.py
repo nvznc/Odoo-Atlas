@@ -2,6 +2,8 @@ from odoo import api, fields, models
 
 
 class PosPrepState(models.Model):
+    """Store the stage state of a preparation line."""
+
     _name = "pos.prep.state"
     _description = "Estado de preparación POS"
 
@@ -27,6 +29,7 @@ class PosPrepState(models.Model):
 
     @api.model
     def toggle_state(self, state_id):
+        """Toggle the pending flag of a preparation state."""
         state = self.browse(int(state_id)).exists()
         if not state:
             return False

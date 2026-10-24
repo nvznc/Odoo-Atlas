@@ -582,8 +582,9 @@ docker exec odoo sh -lc 'odoo -d odoo_prep_display_test -u pos_preparation_displ
 1. Abrir la pantalla de cocina y la TV en los equipos definitivos y validar tamaños,
    sonido y red local.
 2. Recargar todas las terminales POS para que carguen los assets nuevos del módulo.
-3. El addon y sus correcciones quedaron en commits locales (`cbb6e7b`, `ab20c2f`,
-   `4467a98`, `d562107`, `dbbe042`); **no** se ha hecho push.
+3. El addon y sus correcciones se consolidaron en commits locales y se publican
+   en `origin/main` (`cbb6e7b`, `ab20c2f`, `4467a98`, `d562107`, `dbbe042`,
+   `c671be9` y el commit de documentación/calidad).
 
 ### 11.5 Despliegue en producción (2026-10-23)
 
@@ -652,3 +653,15 @@ docker exec odoo sh -lc 'odoo -d odoo_prep_display_test -u pos_preparation_displ
   los asientos de las mesas para evitar duplicar.
 - Sin cambios de esquema; se reutiliza el backup previo
   `backups/odoo_before_i18n_20261024_002102.dump`.
+
+### 11.8 Documentación y calidad (2026-10-24)
+
+- Se agregó el [README del addon](addons/pos_preparation_display_atlas/README.md)
+  con requisitos, funcionalidad, instalación, configuración, URLs, pruebas y
+  comportamiento de mesas combinadas y comensales.
+- Se actualizó el README raíz para enlazar la documentación del addon.
+- Se revisó el código con `ruff check`, `ruff format --check` y `compileall`.
+- Se refactorizó internamente `_process_preparation_changes` en funciones más
+  pequeñas, sin cambios funcionales, para cumplir la complejidad máxima del CI.
+- Se documentaron clases y métodos públicos del addon.
+- Tests posteriores a la refactorización: `11/11 OK`.

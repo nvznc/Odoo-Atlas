@@ -2,6 +2,8 @@ from odoo import fields, models
 
 
 class PosConfig(models.Model):
+    """Configure preparation display support per POS."""
+
     _inherit = "pos.config"
 
     prep_display_enabled = fields.Boolean(

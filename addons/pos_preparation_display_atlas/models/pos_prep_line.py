@@ -2,6 +2,8 @@ from odoo import fields, models
 
 
 class PosPrepLine(models.Model):
+    """Store preparation data for a POS order line."""
+
     _name = "pos.prep.line"
     _description = "Línea de preparación POS"
 
@@ -54,5 +56,6 @@ class PosPrepLine(models.Model):
 
     @property
     def pending_quantity(self):
+        """Return the quantity still pending preparation."""
         self.ensure_one()
         return self.quantity - self.cancelled

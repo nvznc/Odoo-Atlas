@@ -1,7 +1,9 @@
-from odoo import api, fields, models, _
+from odoo import _, api, fields, models
 
 
 class PosPrepOrder(models.Model):
+    """Represent a POS order inside the preparation workflow."""
+
     _name = "pos.prep.order"
     _description = "Orden de preparación POS"
     _pos_order_uniq = models.Constraint(
@@ -92,18 +94,14 @@ class PosPrepOrder(models.Model):
         self.ensure_one()
         states = self.prep_line_ids.state_ids
         if display:
-            states = states.filtered(
-                lambda state: state.stage_id.prep_display_id == display
-            )
+            states = states.filtered(lambda state: state.stage_id.prep_display_id == display)
         return states
 
     def _get_current_stage(self, display):
         self.ensure_one()
         states = self._get_states(display)
         if not states:
-            return display.stage_ids.sorted(
-                lambda stage: (stage.sequence, stage.id)
-            )[:1]
+            return display.stage_ids.sorted(lambda stage: (stage.sequence, stage.id))[:1]
         return max(
             states.mapped("stage_id"),
             key=lambda stage: (stage.sequence, stage.id),
@@ -111,6 +109,7 @@ class PosPrepOrder(models.Model):
 
     @api.model
     def process_order(self, order_id, options=None):
+        """Process or update the preparation data of a POS order."""
         options = options or {}
         order = self.env["pos.order"].browse(int(order_id)).exists()
         if not order:
@@ -127,6 +126,7 @@ class PosPrepOrder(models.Model):
 
     @api.model
     def advance_order(self, prep_order_id, display_id, direction=1):
+        """Move the order to the previous or next preparation stage."""
         prep_order = self.browse(int(prep_order_id)).exists()
         display = self.env["pos.prep.display"].browse(int(display_id)).exists()
         if not prep_order or not display:
@@ -158,6 +158,7 @@ class PosPrepOrder(models.Model):
 
     @api.model
     def reset_order(self, prep_order_id, display_id):
+        """Return the order to the first preparation stage."""
         prep_order = self.browse(int(prep_order_id)).exists()
         display = self.env["pos.prep.display"].browse(int(display_id)).exists()
         if not prep_order or not display:
@@ -179,6 +180,7 @@ class PosPrepOrder(models.Model):
 
     @api.model
     def complete_order(self, prep_order_id, display_id):
+        """Move the order to the last preparation stage."""
         prep_order = self.browse(int(prep_order_id)).exists()
         display = self.env["pos.prep.display"].browse(int(display_id)).exists()
         if not prep_order or not display:

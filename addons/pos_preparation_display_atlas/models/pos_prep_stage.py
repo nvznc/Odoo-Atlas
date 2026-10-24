@@ -2,6 +2,8 @@ from odoo import fields, models
 
 
 class PosPrepStage(models.Model):
+    """Define a preparation stage for a display."""
+
     _name = "pos.prep.stage"
     _description = "Etapa de preparación POS"
     _order = "sequence, id"
@@ -23,10 +25,9 @@ class PosPrepStage(models.Model):
     sequence = fields.Integer(string="Secuencia", default=10)
 
     def is_stage_position(self, position):
+        """Return whether this stage is at the given position."""
         self.ensure_one()
-        stages = self.prep_display_id.stage_ids.sorted(
-            lambda stage: (stage.sequence, stage.id)
-        )
+        stages = self.prep_display_id.stage_ids.sorted(lambda stage: (stage.sequence, stage.id))
         try:
             return stages[position].id == self.id
         except IndexError:

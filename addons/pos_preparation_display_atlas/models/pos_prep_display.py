@@ -2,11 +2,13 @@ import json
 import uuid
 from datetime import timedelta
 
-from odoo import api, fields, models, _
+from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 
 
 class PosPrepDisplay(models.Model):
+    """Configure kitchen and public preparation screens."""
+
     _name = "pos.prep.display"
     _description = "Pantalla de preparación POS"
     _inherit = ["pos.bus.mixin", "pos.load.mixin"]
@@ -37,8 +39,7 @@ class PosPrepDisplay(models.Model):
     auto_clear = fields.Boolean(
         string="Limpieza automática",
         help=(
-            "Elimina los pedidos listos de la pantalla pública después del "
-            "intervalo configurado."
+            "Elimina los pedidos listos de la pantalla pública después del intervalo configurado."
         ),
     )
     clear_time_interval = fields.Integer(
@@ -59,11 +60,10 @@ class PosPrepDisplay(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
+        """Create displays with default stages when none are provided."""
         for vals in vals_list:
             if not vals.get("stage_ids"):
-                vals["stage_ids"] = [
-                    (0, 0, stage) for stage in self._default_stages()
-                ]
+                vals["stage_ids"] = [(0, 0, stage) for stage in self._default_stages()]
         return super().create(vals_list)
 
     @api.constrains("clear_time_interval")
@@ -92,9 +92,7 @@ class PosPrepDisplay(models.Model):
     def _compute_dashboard_values(self):
         for display in self:
             states = display._get_open_states()
-            display.order_count = len(
-                states.mapped("prep_line_id.prep_order_id")
-            )
+            display.order_count = len(states.mapped("prep_line_id.prep_order_id"))
             completed = self.env["pos.prep.order"].search(
                 [
                     ("completion_time", ">", 0),
@@ -148,8 +146,10 @@ class PosPrepDisplay(models.Model):
         )
         category_ids = set(category_ids or [])
         return candidates.filtered(
-            lambda display: display._is_enabled_for_config(order.config_id)
-            and display._matches_categories(category_ids)
+            lambda display: (
+                display._is_enabled_for_config(order.config_id)
+                and display._matches_categories(category_ids)
+            )
         )
 
     def _get_open_states(self):
@@ -164,9 +164,11 @@ class PosPrepDisplay(models.Model):
             ]
         )
         return states.filtered(
-            lambda state: state.prep_line_id.prep_order_id.pos_order_id.session_id.state
-            not in ("closed", "closing_control")
-            and state.prep_line_id.quantity - state.prep_line_id.cancelled > 0
+            lambda state: (
+                state.prep_line_id.prep_order_id.pos_order_id.session_id.state
+                not in ("closed", "closing_control")
+                and state.prep_line_id.quantity - state.prep_line_id.cancelled > 0
+            )
         )
 
     def _load_pos_data_domain(self, data, config):
@@ -276,6 +278,7 @@ class PosPrepDisplay(models.Model):
         return lines
 
     def get_display_data(self):
+        """Return the kitchen data for this preparation display."""
         self.ensure_one()
         states = self.env["pos.prep.state"].search(
             [
@@ -283,9 +286,11 @@ class PosPrepDisplay(models.Model):
             ]
         )
         states = states.filtered(
-            lambda state: state.prep_line_id.prep_order_id.pos_order_id.session_id.state
-            not in ("closed", "closing_control")
-            and state.prep_line_id.quantity - state.prep_line_id.cancelled > 0
+            lambda state: (
+                state.prep_line_id.prep_order_id.pos_order_id.session_id.state
+                not in ("closed", "closing_control")
+                and state.prep_line_id.quantity - state.prep_line_id.cancelled > 0
+            )
         )
         grouped = {}
         for state in states:
@@ -320,7 +325,7 @@ class PosPrepDisplay(models.Model):
 
         orders = []
         for item in grouped.values():
-            stage = self.stage_ids.filtered(lambda s: s.id == item["stage_id"])
+            stage = self.stage_ids.filtered(lambda stage, item=item: stage.id == item["stage_id"])
             item["lines"] = self._serialize_order_lines(item.pop("states"), stage)
             item["stage_started_at"] = (
                 fields.Datetime.to_string(item["stage_started_at"])
@@ -365,9 +370,7 @@ class PosPrepDisplay(models.Model):
             "tracking_number": pos_order.tracking_number or "",
             "table": prep_order._get_table_label(),
             "customer_count": prep_order._get_customer_count(),
-            "ready_since": fields.Datetime.to_string(ready_since)
-            if ready_since
-            else False,
+            "ready_since": fields.Datetime.to_string(ready_since) if ready_since else False,
         }
 
     def _get_public_orders(self):
@@ -385,9 +388,11 @@ class PosPrepDisplay(models.Model):
             ]
         )
         states = states.filtered(
-            lambda state: state.prep_line_id.prep_order_id.pos_order_id.session_id.state
-            not in ("closed", "closing_control")
-            and state.prep_line_id.quantity - state.prep_line_id.cancelled > 0
+            lambda state: (
+                state.prep_line_id.prep_order_id.pos_order_id.session_id.state
+                not in ("closed", "closing_control")
+                and state.prep_line_id.quantity - state.prep_line_id.cancelled > 0
+            )
         )
 
         by_order = {}
@@ -401,9 +406,7 @@ class PosPrepDisplay(models.Model):
         now = fields.Datetime.now()
         for prep_order_id, order_states in by_order.items():
             prep_order = self.env["pos.prep.order"].browse(prep_order_id)
-            order_states = self.env["pos.prep.state"].browse(
-                [state.id for state in order_states]
-            )
+            order_states = self.env["pos.prep.state"].browse([state.id for state in order_states])
             ready_states = order_states.filtered(lambda s: s.stage_id == ready_stage)
             if len(ready_states) == len(order_states):
                 ready_since = max(ready_states.mapped("last_stage_change"))
@@ -413,9 +416,7 @@ class PosPrepDisplay(models.Model):
                     and now - ready_since > timedelta(minutes=self.clear_time_interval)
                 ):
                     continue
-                ready.append(
-                    self._get_public_order_payload(prep_order, ready_since)
-                )
+                ready.append(self._get_public_order_payload(prep_order, ready_since))
             elif ready_states:
                 almost_ready.append(self._get_public_order_payload(prep_order))
             else:
@@ -438,6 +439,7 @@ class PosPrepDisplay(models.Model):
 
     @api.model
     def get_order_status_data(self, access_token):
+        """Return public order data for the given access token."""
         display = self.sudo().search(
             [("access_token", "=", access_token), ("active", "=", True)],
             limit=1,
@@ -447,11 +449,10 @@ class PosPrepDisplay(models.Model):
         return display._get_public_orders()
 
     def reset_all_orders(self, return_data=False):
+        """Reset all preparation states of this display."""
         data = False
         for display in self:
-            states = self.env["pos.prep.state"].search(
-                [("stage_id", "in", display.stage_ids.ids)]
-            )
+            states = self.env["pos.prep.state"].search([("stage_id", "in", display.stage_ids.ids)])
             states.unlink()
             display._send_load_orders_message()
             if return_data:
@@ -459,20 +460,22 @@ class PosPrepDisplay(models.Model):
         return data or True
 
     def open_preparation_screen(self):
+        """Open the kitchen screen for this display."""
         self.ensure_one()
         self.sudo()._ensure_access_token()
         return {
             "type": "ir.actions.act_url",
-            "url": "/pos_preparation_display/web?display_id=%d" % self.id,
+            "url": f"/pos_preparation_display/web?display_id={self.id}",
             "target": "self",
         }
 
     def open_order_status_screen(self):
+        """Open the public order status screen."""
         self.ensure_one()
         self.sudo()._ensure_access_token()
         return {
             "type": "ir.actions.act_url",
-            "url": "/pos-order-tracking?access_token=%s" % self.access_token,
+            "url": f"/pos-order-tracking?access_token={self.access_token}",
             "target": "new",
         }
 

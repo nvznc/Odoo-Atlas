@@ -2,6 +2,8 @@ from odoo import fields, models
 
 
 class PosOrderLine(models.Model):
+    """Track preparation and service times on POS order lines."""
+
     _inherit = "pos.order.line"
 
     preparation_time = fields.Integer(
