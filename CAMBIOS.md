@@ -476,8 +476,8 @@ curl -s -o /dev/null -w "%{http_code}\n" http://localhost:8069/web/database/sele
 - El bundle del POS con la corrección es `/web/assets/9f12006/point_of_sale._assets_pos.min.js`.
 - Los tests de Python del módulo de preparación están en 10/10; los tests de los
   addons BCV siguen en 14/14.
-- Pantalla de producción creada: `Cocina`, para los POS `Restaurante` y `Bar`, sin
-  filtro de categorías (todas).
+- Pantalla de producción creada: `Cocina`, para los POS `Restaurante` y `Bar`, con
+  las categorías de comida y excluyendo `Bebidas` y `Cafes y Tes`.
 
 ### 9.2 Acciones pendientes / recomendadas
 
@@ -579,12 +579,10 @@ docker exec odoo sh -lc 'odoo -d odoo_prep_display_test -u pos_preparation_displ
 
 ### 11.4 Pendientes
 
-1. Ajustar el filtro de categorías de la pantalla `Cocina`; actualmente muestra todas
-   las categorías de `Restaurante` y `Bar`.
-2. Abrir la pantalla de cocina y la TV en los equipos definitivos y validar tamaños,
+1. Abrir la pantalla de cocina y la TV en los equipos definitivos y validar tamaños,
    sonido y red local.
-3. Recargar todas las terminales POS para que carguen los assets nuevos del módulo.
-4. El addon y sus correcciones quedaron en commits locales (`cbb6e7b`, `ab20c2f`,
+2. Recargar todas las terminales POS para que carguen los assets nuevos del módulo.
+3. El addon y sus correcciones quedaron en commits locales (`cbb6e7b`, `ab20c2f`,
    `4467a98`, `d562107`); **no** se ha hecho push.
 
 ### 11.5 Despliegue en producción (2026-10-23)
@@ -596,6 +594,9 @@ docker exec odoo sh -lc 'odoo -d odoo_prep_display_test -u pos_preparation_displ
   `odoo -d odoo -i pos_preparation_display_atlas --stop-after-init --http-port=8072`.
 - Resultado: módulo `installed`, 0 errores en el log.
 - Pantalla `Cocina` (id `1`) con etapas `Preparando`, `Listo` y `Completado`.
+- Categorías incluidas: `Pastas`, `Salsas`, `Entradas`, `Ensaladas`, `Sopas y Cremas`,
+  `Arroces`, `Carnes y Aves`, `Pescados y Mariscos` y `Entradas y Acompañantes`.
+  Se excluyen `Bebidas` y `Cafes y Tes`.
 - Verificación HTTP:
   - pantalla pública con token válido: `200`;
   - assets de la pantalla pública: `200`;
