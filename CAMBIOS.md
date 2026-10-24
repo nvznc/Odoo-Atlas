@@ -583,7 +583,7 @@ docker exec odoo sh -lc 'odoo -d odoo_prep_display_test -u pos_preparation_displ
    sonido y red local.
 2. Recargar todas las terminales POS para que carguen los assets nuevos del módulo.
 3. El addon y sus correcciones quedaron en commits locales (`cbb6e7b`, `ab20c2f`,
-   `4467a98`, `d562107`); **no** se ha hecho push.
+   `4467a98`, `d562107`, `dbbe042`); **no** se ha hecho push.
 
 ### 11.5 Despliegue en producción (2026-10-23)
 
@@ -593,15 +593,18 @@ docker exec odoo sh -lc 'odoo -d odoo_prep_display_test -u pos_preparation_displ
 - Instalación con contenedor temporal y Odoo detenido:
   `odoo -d odoo -i pos_preparation_display_atlas --stop-after-init --http-port=8072`.
 - Resultado: módulo `installed`, 0 errores en el log.
+- Se fijó `--db-filter=^odoo$` en `docker-compose.yml` para que la pantalla pública
+  abra sin selector de base y las bases de prueba no se expongan por el puerto `8069`.
 - Pantalla `Cocina` (id `1`) con etapas `Preparando`, `Listo` y `Completado`.
 - Categorías incluidas: `Pastas`, `Salsas`, `Entradas`, `Ensaladas`, `Sopas y Cremas`,
   `Arroces`, `Carnes y Aves`, `Pescados y Mariscos` y `Entradas y Acompañantes`.
   Se excluyen `Bebidas` y `Cafes y Tes`.
 - Verificación HTTP:
-  - pantalla pública con token válido: `200`;
+  - pantalla pública con token válido y sin cabecera de base de datos: `200`;
   - assets de la pantalla pública: `200`;
   - cocina sin sesión: `303` (redirección a login);
   - token inválido: `404`;
-  - JSON público: columnas vacías y etiquetas correctas.
+  - JSON público: columnas vacías y etiquetas correctas;
+  - selector de base de datos: solo aparece `odoo`.
 - El token público no se escribe en este documento; se consulta en la ficha de la
   pantalla de preparación.

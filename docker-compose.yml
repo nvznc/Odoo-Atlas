@@ -19,6 +19,7 @@ services:
     image: odoo:19.0
     container_name: odoo
     restart: unless-stopped
+    command: ["odoo", "--db-filter=^odoo$$"]
     depends_on:
       db:
         condition: service_healthy
