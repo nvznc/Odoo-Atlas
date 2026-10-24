@@ -471,9 +471,13 @@ curl -s -o /dev/null -w "%{http_code}\n" http://localhost:8069/web/database/sele
 - `pos_bcv_multi_currency` en `19.0.1.0.2`.
 - `currency_rate_bcv` en `19.0.1.0.0`.
 - Último commit de código en GitHub: `f397f6f`.
-- `pos_preparation_display_atlas` está instalado solo en la base de prueba; aún no en producción.
+- `pos_preparation_display_atlas` está instalado en producción (`odoo`, versión
+  `19.0.1.0.0`) y en la base de prueba.
 - El bundle del POS con la corrección es `/web/assets/9f12006/point_of_sale._assets_pos.min.js`.
-- Los tests de Python siguen en 14/14.
+- Los tests de Python del módulo de preparación están en 10/10; los tests de los
+  addons BCV siguen en 14/14.
+- Pantalla de producción creada: `Cocina`, para los POS `Restaurante` y `Bar`, sin
+  filtro de categorías (todas).
 
 ### 9.2 Acciones pendientes / recomendadas
 
@@ -575,7 +579,28 @@ docker exec odoo sh -lc 'odoo -d odoo_prep_display_test -u pos_preparation_displ
 
 ### 11.4 Pendientes
 
-1. Instalar el módulo en producción cuando se autorice.
-2. Probar la interacción real en la TV/terminal definitiva (sonido, tamaños y red local).
-3. El addon y sus correcciones quedaron en commits locales (`cbb6e7b`, `ab20c2f`,
+1. Ajustar el filtro de categorías de la pantalla `Cocina`; actualmente muestra todas
+   las categorías de `Restaurante` y `Bar`.
+2. Abrir la pantalla de cocina y la TV en los equipos definitivos y validar tamaños,
+   sonido y red local.
+3. Recargar todas las terminales POS para que carguen los assets nuevos del módulo.
+4. El addon y sus correcciones quedaron en commits locales (`cbb6e7b`, `ab20c2f`,
    `4467a98`, `d562107`); **no** se ha hecho push.
+
+### 11.5 Despliegue en producción (2026-10-23)
+
+- Backup previo a la instalación:
+  - `backups/odoo_before_prep_display_prod_20261023_233133.dump`
+  - `backups/filestore_odoo_before_prep_display_prod_20261023_233133.tar.gz`
+- Instalación con contenedor temporal y Odoo detenido:
+  `odoo -d odoo -i pos_preparation_display_atlas --stop-after-init --http-port=8072`.
+- Resultado: módulo `installed`, 0 errores en el log.
+- Pantalla `Cocina` (id `1`) con etapas `Preparando`, `Listo` y `Completado`.
+- Verificación HTTP:
+  - pantalla pública con token válido: `200`;
+  - assets de la pantalla pública: `200`;
+  - cocina sin sesión: `303` (redirección a login);
+  - token inválido: `404`;
+  - JSON público: columnas vacías y etiquetas correctas.
+- El token público no se escribe en este documento; se consulta en la ficha de la
+  pantalla de preparación.
