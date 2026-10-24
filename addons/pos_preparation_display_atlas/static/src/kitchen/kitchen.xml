@@ -31,6 +31,13 @@
                     </button>
                 </nav>
                 <div class="o_prep_header_actions">
+                    <button
+                        class="btn btn-outline-light"
+                        t-on-click="goBack"
+                        title="Volver al menú anterior de Odoo"
+                    >
+                        ← Volver a Odoo
+                    </button>
                     <button class="btn btn-outline-light" t-on-click="resetAll">
                         Reiniciar todo
                     </button>
@@ -68,7 +75,7 @@
                     <div class="o_prep_card_number" t-esc="order.name"/>
                     <div class="o_prep_card_meta">
                         <span t-if="order.table">Mesa <t t-esc="order.table"/></span>
-                        <span t-if="order.customer_count">· <t t-esc="order.customer_count"/> pers.</span>
+                        <span t-if="order.customer_count">· <t t-esc="order.customer_count"/> personas</span>
                     </div>
                 </div>
                 <div class="o_prep_card_timer">

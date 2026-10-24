@@ -3,14 +3,15 @@ from odoo import api, fields, models, _
 
 class PosPrepOrder(models.Model):
     _name = "pos.prep.order"
-    _description = "POS Preparation Order"
+    _description = "Orden de preparación POS"
     _pos_order_uniq = models.Constraint(
         "unique(pos_order_id)",
-        "A preparation order already exists for this POS order.",
+        "Ya existe una orden de preparación para este pedido POS.",
     )
 
     pos_order_id = fields.Many2one(
         "pos.order",
+        string="Pedido POS",
         required=True,
         ondelete="cascade",
         index=True,
@@ -18,16 +19,24 @@ class PosPrepOrder(models.Model):
     prep_line_ids = fields.One2many(
         "pos.prep.line",
         "prep_order_id",
-        string="Preparation Lines",
+        string="Líneas de preparación",
     )
-    order_name = fields.Char(compute="_compute_order_name")
-    pdis_general_customer_note = fields.Text()
-    pdis_internal_note = fields.Text()
+    order_name = fields.Char(
+        string="Nombre del pedido",
+        compute="_compute_order_name",
+    )
+    pdis_general_customer_note = fields.Text(string="Nota general del cliente")
+    pdis_internal_note = fields.Text(string="Nota interna")
     completion_time = fields.Integer(
-        help="Minutes between order creation and completion.",
+        string="Tiempo de finalización",
+        help="Minutos entre la creación y la finalización del pedido.",
     )
 
-    @api.depends("pos_order_id.table_id", "pos_order_id.floating_order_name", "pos_order_id.tracking_number")
+    @api.depends(
+        "pos_order_id.table_id",
+        "pos_order_id.floating_order_name",
+        "pos_order_id.tracking_number",
+    )
     def _compute_order_name(self):
         for prep_order in self:
             pos_order = prep_order.pos_order_id
@@ -37,7 +46,7 @@ class PosPrepOrder(models.Model):
                 or pos_order.floating_order_name
                 or pos_order.tracking_number
                 or pos_order.name
-                or _("Order")
+                or _("Pedido")
             )
 
     def _get_table_label(self):
@@ -45,10 +54,35 @@ class PosPrepOrder(models.Model):
         table = self.pos_order_id.table_id
         if not table:
             return self.pos_order_id.floating_order_name or ""
-        label = "T%s" % table.table_number
-        if table.parent_id:
-            label += " & T%s" % table.parent_id.table_number
-        return label
+
+        tables = (
+            self.env["restaurant.table"].search(
+                [("floor_id", "=", table.floor_id.id), ("active", "=", True)]
+            )
+            if table.floor_id
+            else table
+        )
+        children = {}
+        for item in tables:
+            if item.parent_id:
+                children.setdefault(item.parent_id.id, []).append(item)
+
+        labels = []
+        seen = set()
+
+        def collect(item):
+            if item.id in seen:
+                return
+            seen.add(item.id)
+            labels.append(str(item.table_number))
+            for child in sorted(
+                children.get(item.id, []),
+                key=lambda child: (child.table_number, child.id),
+            ):
+                collect(child)
+
+        collect(table)
+        return " y ".join(labels)
 
     def _get_customer_count(self):
         self.ensure_one()

@@ -608,3 +608,47 @@ docker exec odoo sh -lc 'odoo -d odoo_prep_display_test -u pos_preparation_displ
   - selector de base de datos: solo aparece `odoo`.
 - El token público no se escribe en este documento; se consulta en la ficha de la
   pantalla de preparación.
+
+### 11.6 Traducción de interfaz y botón Volver (2026-10-24)
+
+- Versión del módulo: `19.0.1.0.1`.
+- Se tradujeron al español los textos visibles del módulo: acción y menú
+  `Pantallas de preparación`, formulario, kanban, búsqueda, ajustes de POS,
+  etiquetas de campos, ayudas, nombres de reglas, cron y mensajes de validación.
+- Se mantuvo en español la pantalla de cocina y se cambió `pers.` por `personas`.
+- Se agregó el botón `← Volver a Odoo` en la cabecera de la pantalla de
+  preparación. Usa el historial del navegador y, si no hay página anterior,
+  abre `/odoo`.
+- Backup previo al upgrade:
+  `backups/odoo_before_i18n_20261024_002102.dump`.
+- Validación en base de prueba:
+  - tests del módulo: `10/10 OK`;
+  - formulario con etiquetas en español;
+  - botón Volver devuelve a `/odoo/action-507/4` desde la pantalla de cocina;
+  - capturas: `/tmp/opencode/prep_form_test.png` y `/tmp/opencode/kitchen_test.png`.
+- Upgrade de producción: módulo `installed` en `19.0.1.0.1`, 0 errores.
+- Verificación en producción: login `200`, pantalla pública `200`, menú y acción
+  `Pantallas de preparación`, campos visibles en español.
+- Validación física: el usuario recargó la pantalla de preparación y la TV y
+  confirmó que todo funciona.
+
+### 11.7 Mesas combinadas en preparación (2026-10-24)
+
+- Incidencia: una orden sobre las mesas `1` y `2` mostraba solo `Mesa 2` en la
+  pantalla de preparación.
+- Causa: `_get_table_label` solo revisaba el `parent_id` de la mesa del pedido.
+  Cuando la mesa `2` era la principal y la `1` la hija, no se incluían las hijas.
+- Corrección: se recorren recursivamente las mesas hijas de la misma planta y se
+  muestra la principal seguida de sus descendientes, separadas por ` y `.
+  Ejemplos: `2 y 1` si se arrastra la mesa 1 a la 2; `1 y 2` si es al revés.
+- La lógica es compartida por preparación y pantalla pública, por lo que la TV
+  también muestra las mesas combinadas.
+- Versión del módulo: `19.0.1.0.2`.
+- Tests: `11/11 OK`, incluida la combinación directa, inversa y anidada.
+- Producción actualizada y verificada en cocina y TV: las órdenes de prueba
+  mostraron `2 y 1`; la relación actual es mesa `1` hija de mesa `2`.
+- Comensales: la pantalla usa `pos_order.customer_count`, que Odoo suma al
+  combinar las órdenes; se verificó un total de `8` en la orden 13. No se suman
+  los asientos de las mesas para evitar duplicar.
+- Sin cambios de esquema; se reutiliza el backup previo
+  `backups/odoo_before_i18n_20261024_002102.dump`.

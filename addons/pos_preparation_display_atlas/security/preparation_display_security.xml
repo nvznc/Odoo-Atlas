@@ -1,27 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="pos_prep_display_company_rule" model="ir.rule">
-        <field name="name">Preparation Display: multi-company</field>
+        <field name="name">Pantalla de preparación: multiempresa</field>
         <field name="model_id" ref="model_pos_prep_display"/>
         <field name="domain_force">[('company_id', 'in', company_ids)]</field>
     </record>
     <record id="pos_prep_stage_company_rule" model="ir.rule">
-        <field name="name">Preparation Stage: multi-company</field>
+        <field name="name">Etapa de preparación: multiempresa</field>
         <field name="model_id" ref="model_pos_prep_stage"/>
         <field name="domain_force">[('prep_display_id.company_id', 'in', company_ids)]</field>
     </record>
     <record id="pos_prep_order_company_rule" model="ir.rule">
-        <field name="name">Preparation Order: multi-company</field>
+        <field name="name">Orden de preparación: multiempresa</field>
         <field name="model_id" ref="model_pos_prep_order"/>
         <field name="domain_force">[('pos_order_id.company_id', 'in', company_ids)]</field>
     </record>
     <record id="pos_prep_line_company_rule" model="ir.rule">
-        <field name="name">Preparation Line: multi-company</field>
+        <field name="name">Línea de preparación: multiempresa</field>
         <field name="model_id" ref="model_pos_prep_line"/>
         <field name="domain_force">[('prep_order_id.pos_order_id.company_id', 'in', company_ids)]</field>
     </record>
     <record id="pos_prep_state_company_rule" model="ir.rule">
-        <field name="name">Preparation State: multi-company</field>
+        <field name="name">Estado de preparación: multiempresa</field>
         <field name="model_id" ref="model_pos_prep_state"/>
         <field name="domain_force">[('stage_id.prep_display_id.company_id', 'in', company_ids)]</field>
     </record>

@@ -3,22 +3,27 @@ from odoo import api, fields, models
 
 class PosPrepState(models.Model):
     _name = "pos.prep.state"
-    _description = "POS Preparation State"
+    _description = "Estado de preparación POS"
 
     prep_line_id = fields.Many2one(
         "pos.prep.line",
+        string="Línea de preparación",
         required=True,
         ondelete="cascade",
         index=True,
     )
-    todo = fields.Boolean(default=True)
+    todo = fields.Boolean(string="Pendiente", default=True)
     stage_id = fields.Many2one(
         "pos.prep.stage",
+        string="Etapa",
         required=True,
         ondelete="cascade",
         index=True,
     )
-    last_stage_change = fields.Datetime(default=fields.Datetime.now)
+    last_stage_change = fields.Datetime(
+        string="Último cambio de etapa",
+        default=fields.Datetime.now,
+    )
 
     @api.model
     def toggle_state(self, state_id):

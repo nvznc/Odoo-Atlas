@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="action_pos_prep_display" model="ir.actions.act_window">
-        <field name="name">Preparation Display</field>
+        <field name="name">Pantallas de preparación</field>
         <field name="res_model">pos.prep.display</field>
         <field name="view_mode">kanban,list,form</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">Create your first preparation screen</p>
-            <p>Choose the point of sale, products and stages shown on the kitchen screen.</p>
+            <p class="o_view_nocontent_smiling_face">Crea tu primera pantalla de preparación</p>
+            <p>Elige el punto de venta, los productos y las etapas que se muestran en la pantalla de cocina.</p>
         </field>
     </record>
 
@@ -14,56 +14,56 @@
         <field name="name">pos.prep.display.form</field>
         <field name="model">pos.prep.display</field>
         <field name="arch" type="xml">
-            <form string="Preparation Display">
+            <form string="Pantalla de preparación">
                 <header>
-                    <button name="open_preparation_screen" type="object" string="Preparation Screen" class="btn-primary"/>
-                    <button name="open_order_status_screen" type="object" string="Order Status Screen"/>
-                    <button name="reset_all_orders" type="object" string="Reset all orders" confirm="This removes all active orders from this screen. Continue?"/>
+                    <button name="open_preparation_screen" type="object" string="Pantalla de cocina" class="btn-primary"/>
+                    <button name="open_order_status_screen" type="object" string="Pantalla de estado de pedidos"/>
+                    <button name="reset_all_orders" type="object" string="Reiniciar todos los pedidos" confirm="Esto elimina todos los pedidos activos de esta pantalla. ¿Continuar?"/>
                 </header>
                 <sheet>
-                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <widget name="web_ribbon" title="Archivado" bg_color="text-bg-danger" invisible="active"/>
                     <div class="oe_title">
                         <label for="name"/>
-                        <h1><field name="name" placeholder="Kitchen screen"/></h1>
+                        <h1><field name="name" placeholder="Pantalla de cocina"/></h1>
                     </div>
                     <group>
                         <group>
                             <field name="active" invisible="1"/>
                             <field name="company_id" groups="base.group_multi_company"/>
-                            <field name="pos_config_ids" widget="many2many_tags" options="{'no_create': True}" placeholder="All points of sale"/>
-                            <field name="category_ids" widget="many2many_tags" options="{'no_create': True}" placeholder="All categories"/>
+                            <field name="pos_config_ids" widget="many2many_tags" options="{'no_create': True}" placeholder="Todos los puntos de venta"/>
+                            <field name="category_ids" widget="many2many_tags" options="{'no_create': True}" placeholder="Todas las categorías"/>
                             <field name="contains_bar_restaurant" invisible="1"/>
                         </group>
                         <group>
                             <label for="auto_clear"/>
                             <div class="o_row">
                                 <field name="auto_clear"/>
-                                <label for="clear_time_interval" string="Clear after"/>
+                                <label for="clear_time_interval" string="Limpiar después de"/>
                                 <field name="clear_time_interval" class="oe_inline"/>
-                                <span>minutes</span>
+                                <span>minutos</span>
                             </div>
                         </group>
                     </group>
                     <notebook>
-                        <page string="Stages" name="stages">
+                        <page string="Etapas" name="stages">
                             <field name="stage_ids">
                                 <list editable="bottom">
                                     <field name="sequence" widget="handle"/>
                                     <field name="name"/>
                                     <field name="color" widget="color"/>
-                                    <field name="alert_timer" string="Alert after (min)"/>
+                                    <field name="alert_timer" string="Alerta después de (min)"/>
                                 </list>
                             </field>
                         </page>
-                        <page string="Public Screen" name="public_screen">
+                        <page string="Pantalla pública" name="public_screen">
                             <group>
                                 <field name="preparing_label"/>
                                 <field name="almost_ready_label"/>
                                 <field name="ready_label"/>
                             </group>
                             <div class="text-muted mt-3">
-                                The order status screen is public. Open it from the
-                                “Order Status Screen” button and use the generated link on the TV.
+                                La pantalla de estado de pedidos es pública. Ábrela con el botón
+                                «Pantalla de estado de pedidos» y usa el enlace generado en la TV.
                             </div>
                         </page>
                     </notebook>
@@ -76,7 +76,7 @@
         <field name="name">pos.prep.display.list</field>
         <field name="model">pos.prep.display</field>
         <field name="arch" type="xml">
-            <list string="Preparation Displays">
+            <list string="Pantallas de preparación">
                 <field name="name"/>
                 <field name="pos_config_ids" widget="many2many_tags"/>
                 <field name="category_ids" widget="many2many_tags"/>
@@ -91,11 +91,11 @@
         <field name="name">pos.prep.display.search</field>
         <field name="model">pos.prep.display</field>
         <field name="arch" type="xml">
-            <search string="Preparation Displays">
+            <search string="Pantallas de preparación">
                 <field name="name"/>
                 <field name="pos_config_ids"/>
-                <filter name="active" string="Active" domain="[('active', '=', True)]"/>
-                <filter name="inactive" string="Archived" domain="[('active', '=', False)]"/>
+                <filter name="active" string="Activas" domain="[('active', '=', True)]"/>
+                <filter name="inactive" string="Archivadas" domain="[('active', '=', False)]"/>
             </search>
         </field>
     </record>
@@ -110,10 +110,10 @@
                         <div class="container">
                             <div class="row">
                                 <div class="col-6">
-                                    <a type="open">Configure</a>
+                                    <a type="open">Configurar</a>
                                 </div>
                                 <div class="col-6">
-                                    <a name="reset_all_orders" type="object">Reset all orders</a>
+                                    <a name="reset_all_orders" type="object">Reiniciar todos los pedidos</a>
                                 </div>
                             </div>
                         </div>
@@ -124,19 +124,19 @@
                         <div class="row pb-4 mt-4">
                             <div name="card_left" class="col-12 col-sm-8 d-flex flex-row flex-wrap gap-1">
                                 <button class="btn btn-primary ms-1" name="open_preparation_screen" type="object">
-                                    Preparation Screen
+                                    Pantalla de preparación
                                 </button>
                                 <button class="btn btn-secondary ms-1" name="open_order_status_screen" type="object">
-                                    Order Status Screen
+                                    Pantalla de estado de pedidos
                                 </button>
                             </div>
                             <div class="col-12 col-sm-4">
                                 <div class="row g-0 text-end pe-1">
-                                    <div class="col-10"><span>In progress</span></div>
+                                    <div class="col-10"><span>En curso</span></div>
                                     <div class="col-2"><field name="order_count"/></div>
                                 </div>
                                 <div class="row g-0 text-end pe-1">
-                                    <div class="col-10"><span>Average time</span></div>
+                                    <div class="col-10"><span>Tiempo promedio</span></div>
                                     <div class="col-2"><span><field name="average_time"/> min</span></div>
                                 </div>
                             </div>
@@ -149,7 +149,7 @@
 
     <menuitem
         id="menu_pos_preparation_display"
-        name="Preparation Display"
+        name="Pantallas de preparación"
         parent="point_of_sale.menu_point_of_sale"
         action="action_pos_prep_display"
         sequence="90"

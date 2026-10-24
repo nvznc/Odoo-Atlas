@@ -4,7 +4,7 @@
         &lt;!DOCTYPE html&gt;
         <html>
             <head>
-                <title>Preparation Display</title>
+                <title>Pantalla de preparación</title>
                 <meta charset="utf-8"/>
                 <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
                 <link rel="shortcut icon" href="/point_of_sale/static/src/img/favicon.ico" type="image/x-icon"/>
@@ -27,7 +27,7 @@
         &lt;!DOCTYPE html&gt;
         <html>
             <head>
-                <title>Order Status</title>
+                <title>Estado de pedidos</title>
                 <meta charset="utf-8"/>
                 <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
                 <link rel="shortcut icon" href="/point_of_sale/static/src/img/favicon.ico" type="image/x-icon"/>

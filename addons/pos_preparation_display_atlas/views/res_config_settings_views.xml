@@ -8,8 +8,8 @@
             <xpath expr="//block[@id='pos_preparation_section']" position="inside">
                 <setting
                     id="pos_prep_display_enabled_setting"
-                    string="Preparation Display"
-                    help="Send orders to kitchen and customer-facing preparation screens."
+                    string="Pantalla de preparación"
+                    help="Envía los pedidos a las pantallas de cocina y de estado de pedidos."
                 >
                     <field name="pos_prep_display_enabled" readonly="pos_has_active_session"/>
                     <div class="content-group" invisible="not pos_prep_display_enabled">
@@ -17,7 +17,7 @@
                             <button
                                 name="%(action_pos_prep_display)d"
                                 type="action"
-                                string="Manage Preparation Displays"
+                                string="Gestionar pantallas de preparación"
                                 icon="oi-arrow-right"
                                 class="btn-link"
                             />

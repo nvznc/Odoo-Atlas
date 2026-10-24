@@ -109,6 +109,14 @@ export class PreparationDisplayApp extends Component {
         this.state.selectedStageId = stageId;
     }
 
+    goBack() {
+        if (window.history.length > 1) {
+            window.history.back();
+        } else {
+            window.location.assign("/odoo");
+        }
+    }
+
     async resetAll() {
         if (window.confirm("¿Eliminar todos los pedidos activos de esta pantalla?")) {
             await this.preparationDisplay.resetAll();

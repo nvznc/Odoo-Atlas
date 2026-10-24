@@ -8,41 +8,46 @@ from odoo.exceptions import ValidationError
 
 class PosPrepDisplay(models.Model):
     _name = "pos.prep.display"
-    _description = "POS Preparation Display"
+    _description = "Pantalla de preparación POS"
     _inherit = ["pos.bus.mixin", "pos.load.mixin"]
     _order = "name, id"
 
-    name = fields.Char(required=True)
-    active = fields.Boolean(default=True)
+    name = fields.Char(string="Nombre", required=True)
+    active = fields.Boolean(string="Activo", default=True)
     company_id = fields.Many2one(
         "res.company",
+        string="Compañía",
         required=True,
         default=lambda self: self.env.company,
     )
-    pos_config_ids = fields.Many2many("pos.config", string="Point of Sale")
+    pos_config_ids = fields.Many2many("pos.config", string="Punto de venta")
     category_ids = fields.Many2many(
         "pos.category",
-        string="Product Categories",
-        help="Leave empty to display all categories.",
+        string="Categorías de productos",
+        help="Déjalo vacío para mostrar todas las categorías.",
     )
-    stage_ids = fields.One2many("pos.prep.stage", "prep_display_id", string="Stages")
-    order_count = fields.Integer(compute="_compute_dashboard_values")
-    average_time = fields.Integer(compute="_compute_dashboard_values")
+    stage_ids = fields.One2many("pos.prep.stage", "prep_display_id", string="Etapas")
+    order_count = fields.Integer(string="Pedidos en curso", compute="_compute_dashboard_values")
+    average_time = fields.Integer(string="Tiempo promedio", compute="_compute_dashboard_values")
     contains_bar_restaurant = fields.Boolean(
+        string="Incluye bar/restaurante",
         compute="_compute_contains_bar_restaurant",
         store=True,
     )
     auto_clear = fields.Boolean(
-        string="Auto clear",
-        help="Remove ready orders from the public screen after the configured interval.",
+        string="Limpieza automática",
+        help=(
+            "Elimina los pedidos listos de la pantalla pública después del "
+            "intervalo configurado."
+        ),
     )
     clear_time_interval = fields.Integer(
-        string="Clear after (minutes)",
+        string="Limpiar después de (minutos)",
         default=10,
     )
-    preparing_label = fields.Char(default="Preparando")
-    almost_ready_label = fields.Char(default="Casi Listo")
-    ready_label = fields.Char(default="Listo")
+    preparing_label = fields.Char(string="Etiqueta Preparando", default="Preparando")
+    almost_ready_label = fields.Char(string="Etiqueta Casi listo", default="Casi Listo")
+    ready_label = fields.Char(string="Etiqueta Listo", default="Listo")
 
     @api.model
     def _default_stages(self):
@@ -66,7 +71,7 @@ class PosPrepDisplay(models.Model):
         for display in self:
             if display.clear_time_interval <= 0:
                 raise ValidationError(
-                    _("The auto clear interval must be greater than zero.")
+                    _("El intervalo de limpieza automática debe ser mayor que cero.")
                 )
 
     @api.constrains("stage_ids")
@@ -74,7 +79,7 @@ class PosPrepDisplay(models.Model):
         for display in self:
             if not display.stage_ids:
                 raise ValidationError(
-                    _("A preparation display must have at least one stage.")
+                    _("La pantalla de preparación debe tener al menos una etapa.")
                 )
 
     @api.depends("pos_config_ids")
@@ -257,7 +262,7 @@ class PosPrepDisplay(models.Model):
                 {
                     "id": line.id,
                     "state_id": state.id,
-                    "product": line.product_id.display_name or _("Product"),
+                    "product": line.product_id.display_name or _("Producto"),
                     "quantity": line.quantity - line.cancelled,
                     "ordered_quantity": line.quantity,
                     "cancelled": line.cancelled,
@@ -292,7 +297,7 @@ class PosPrepDisplay(models.Model):
                     "id": prep_order.id,
                     "name": prep_order.order_name
                     or prep_order.pos_order_id.tracking_number
-                    or _("Order"),
+                    or _("Pedido"),
                     "tracking_number": prep_order.pos_order_id.tracking_number or "",
                     "table": prep_order._get_table_label(),
                     "customer_count": prep_order._get_customer_count(),
@@ -356,7 +361,7 @@ class PosPrepDisplay(models.Model):
             "name": prep_order.order_name
             or pos_order.tracking_number
             or pos_order.name
-            or _("Order"),
+            or _("Pedido"),
             "tracking_number": pos_order.tracking_number or "",
             "table": prep_order._get_table_label(),
             "customer_count": prep_order._get_customer_count(),

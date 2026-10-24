@@ -76,7 +76,10 @@
 }
 
 .o_prep_header_actions {
-    text-align: right;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    flex-wrap: wrap;
 }
 
 .o_prep_board {

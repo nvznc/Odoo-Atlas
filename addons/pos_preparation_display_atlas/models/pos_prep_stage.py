@@ -3,23 +3,24 @@ from odoo import fields, models
 
 class PosPrepStage(models.Model):
     _name = "pos.prep.stage"
-    _description = "POS Preparation Stage"
+    _description = "Etapa de preparación POS"
     _order = "sequence, id"
 
-    name = fields.Char(required=True)
-    color = fields.Char(default="#6C757D")
+    name = fields.Char(string="Nombre", required=True)
+    color = fields.Char(string="Color", default="#6C757D")
     alert_timer = fields.Integer(
-        string="Alert timer (minutes)",
+        string="Temporizador de alerta (minutos)",
         default=10,
-        help="Minutes before the order is highlighted as late.",
+        help="Minutos antes de resaltar el pedido como atrasado.",
     )
     prep_display_id = fields.Many2one(
         "pos.prep.display",
+        string="Pantalla de preparación",
         required=True,
         ondelete="cascade",
         index=True,
     )
-    sequence = fields.Integer(default=10)
+    sequence = fields.Integer(string="Secuencia", default=10)
 
     def is_stage_position(self, position):
         self.ensure_one()

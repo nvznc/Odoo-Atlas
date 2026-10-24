@@ -1,14 +1,14 @@
 {
-    "name": "POS Preparation Display",
-    "version": "19.0.1.0.0",
-    "category": "Sales/Point of Sale",
-    "summary": "Preparation screen for kitchen and public order status screen",
+    "name": "Pantalla de preparación POS",
+    "version": "19.0.1.0.2",
+    "category": "Ventas/Punto de venta",
+    "summary": "Pantalla de cocina y pantalla pública de estado de pedidos",
     "description": """
-Adds a preparation screen for kitchen/bar staff and a public order status
-screen for customer-facing televisions.
+Agrega una pantalla de preparación para cocina/bar y una pantalla pública de
+estado de pedidos para televisores orientados al cliente.
 
-This module is an independent implementation for Odoo Community. It does not
-contain code from the Odoo Enterprise Edition.
+Este módulo es una implementación independiente para Odoo Community. No
+contiene código de Odoo Enterprise Edition.
 """,
     "author": "Odoo Atlas",
     "license": "LGPL-3",

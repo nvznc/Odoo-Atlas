@@ -45,16 +45,17 @@ class TestPreparationDisplay(TransactionCase):
             }
         )
 
-    def _create_order(self, lines):
-        order = self.env["pos.order"].create(
-            {
-                "session_id": self.session.id,
-                "amount_total": sum(qty * 5.0 for _product, qty in lines),
-                "amount_paid": 0.0,
-                "amount_tax": 0.0,
-                "amount_return": 0.0,
-            }
-        )
+    def _create_order(self, lines, table=None):
+        values = {
+            "session_id": self.session.id,
+            "amount_total": sum(qty * 5.0 for _product, qty in lines),
+            "amount_paid": 0.0,
+            "amount_tax": 0.0,
+            "amount_return": 0.0,
+        }
+        if table:
+            values["table_id"] = table.id
+        order = self.env["pos.order"].create(values)
         for product, qty in lines:
             self.env["pos.order.line"].create(
                 {
@@ -153,6 +154,33 @@ class TestPreparationDisplay(TransactionCase):
         )
         self.assertEqual(state.stage_id, stages[0])
         self.assertTrue(state.todo)
+
+    def test_table_label_includes_merged_tables(self):
+        floor = self.env["restaurant.floor"].create({"name": "Test Floor"})
+        table_1 = self.env["restaurant.table"].create(
+            {"floor_id": floor.id, "table_number": 1}
+        )
+        table_2 = self.env["restaurant.table"].create(
+            {"floor_id": floor.id, "table_number": 2}
+        )
+        table_3 = self.env["restaurant.table"].create(
+            {"floor_id": floor.id, "table_number": 3}
+        )
+        order = self._create_order([(self.product_food, 1)], table=table_2)
+        prep_order = self._process_order(order)
+
+        self.assertEqual(prep_order._get_table_label(), "2")
+
+        table_1.parent_id = table_2
+        self.assertEqual(prep_order._get_table_label(), "2 y 1")
+
+        table_3.parent_id = table_2
+        self.assertEqual(prep_order._get_table_label(), "2 y 1 y 3")
+
+        table_1.parent_id = False
+        table_2.parent_id = table_1
+        order.table_id = table_1
+        self.assertEqual(prep_order._get_table_label(), "1 y 2 y 3")
 
     def test_public_screen_three_columns(self):
         order = self._create_order(

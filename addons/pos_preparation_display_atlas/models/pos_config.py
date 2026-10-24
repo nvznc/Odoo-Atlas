@@ -5,7 +5,7 @@ class PosConfig(models.Model):
     _inherit = "pos.config"
 
     prep_display_enabled = fields.Boolean(
-        string="Preparation Display",
+        string="Pantalla de preparación",
         default=True,
-        help="Send orders from this point of sale to the preparation screens.",
+        help="Envía los pedidos de este punto de venta a las pantallas de preparación.",
     )

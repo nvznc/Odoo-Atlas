@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="preparation_display_cleanup_cron" model="ir.cron">
-        <field name="name">Preparation Display: clean old orders</field>
+        <field name="name">Pantalla de preparación: limpiar pedidos antiguos</field>
         <field name="model_id" ref="model_pos_prep_display"/>
         <field name="state">code</field>
         <field name="code">model._clean_preparation_data()</field>
