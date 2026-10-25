@@ -33,5 +33,17 @@
                 </div>
             </div>
         </xpath>
+
+        <xpath expr="//div[@t-foreach='props.non_cash_payment_methods']//span[@t-esc='env.utils.formatCurrency(pm.amount)']" position="attributes">
+            <attribute name="t-esc">formatMethodAmount(pm, pm.amount)</attribute>
+        </xpath>
+
+        <xpath expr="//div[@t-foreach='props.non_cash_payment_methods']//span[@t-esc='env.utils.formatCurrency(counted)']" position="attributes">
+            <attribute name="t-esc">formatMethodAmount(pm, counted)</attribute>
+        </xpath>
+
+        <xpath expr="//div[@t-foreach='props.non_cash_payment_methods']//span[@t-esc='env.utils.formatCurrency(diff)']" position="attributes">
+            <attribute name="t-esc">formatMethodAmount(pm, diff)</attribute>
+        </xpath>
     </t>
 </templates>

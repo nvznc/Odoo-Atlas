@@ -1,6 +1,6 @@
 {
     "name": "POS BCV Multi Currency",
-    "version": "19.0.1.0.2",
+    "version": "19.0.1.0.4",
     "summary": "Cobro en bolívares con tasa BCV en el punto de venta",
     "description": """
 Agrega soporte para cobrar en bolívares (VES) en el POS usando la tasa
@@ -19,6 +19,7 @@ separada para el efectivo en bolívares.
         "views/pos_order_views.xml",
         "views/pos_payment_views.xml",
         "views/pos_session_views.xml",
+        "views/report_saledetails_bcv.xml",
     ],
     "assets": {
         "point_of_sale._assets_pos": [

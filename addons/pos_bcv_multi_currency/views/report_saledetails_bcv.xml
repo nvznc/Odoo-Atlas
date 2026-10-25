@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="pos_session_sales_details_bcv" inherit_id="point_of_sale.pos_session_sales_details">
+        <xpath expr="//div[@id='payments']" position="after">
+            <div t-if="bcv_payments" id="bcv_payments" style="page-break-inside: avoid;">
+                <h6 class="bg-secondary p-1 fw-bold w-50 ms-auto">Pagos en Bs</h6>
+                <div t-if="bcv_rate" class="text-end text-muted w-50 ms-auto">
+                    Tasa BCV:
+                    <span t-out="bcv_rate" t-options="{'widget': 'float', 'precision': 6}"/>
+                    <t t-if="bcv_rate_date">
+                        (<span t-out="bcv_rate_date" t-options="{'widget': 'date'}"/>)
+                    </t>
+                </div>
+                <table class="table table-sm table-borderless w-50 ms-auto">
+                    <tbody>
+                        <tr t-foreach="bcv_payments" t-as="bcv_payment">
+                            <td class="ps-2 fw-bold">
+                                <span t-out="bcv_payment['name']"/>
+                                <t t-if="show_bcv_session">
+                                    <span class="text-muted">
+                                        - <t t-out="bcv_payment['session_name']"/>
+                                    </span>
+                                </t>
+                                <t t-if="not bcv_rate and bcv_payment['rate']">
+                                    <br/>
+                                    <span class="text-muted small">
+                                        Tasa:
+                                        <span t-out="bcv_payment['rate']" t-options="{'widget': 'float', 'precision': 6}"/>
+                                        <t t-if="bcv_payment['rate_date']">
+                                            (<span t-out="bcv_payment['rate_date']" t-options="{'widget': 'date'}"/>)
+                                        </t>
+                                    </span>
+                                </t>
+                            </td>
+                            <td class="text-end">
+                                <t t-if="bcv_currency['position']">
+                                    <span t-out="bcv_payment['amount']" t-options="{'widget': 'float', 'precision': bcv_currency['precision']}"/><span t-out="bcv_currency['symbol']"/>
+                                </t>
+                                <t t-else="">
+                                    <span t-out="bcv_currency['symbol']"/><span t-out="bcv_payment['amount']" t-options="{'widget': 'float', 'precision': bcv_currency['precision']}"/>
+                                </t>
+                            </td>
+                        </tr>
+                        <tr class="border-top">
+                            <td class="ps-2 fw-bolder">Total Bs</td>
+                            <td class="text-end fw-bolder">
+                                <t t-if="bcv_currency['position']">
+                                    <span t-out="bcv_payments_total" t-options="{'widget': 'float', 'precision': bcv_currency['precision']}"/><span t-out="bcv_currency['symbol']"/>
+                                </t>
+                                <t t-else="">
+                                    <span t-out="bcv_currency['symbol']"/><span t-out="bcv_payments_total" t-options="{'widget': 'float', 'precision': bcv_currency['precision']}"/>
+                                </t>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </xpath>
+    </template>
+</odoo>

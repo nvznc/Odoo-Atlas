@@ -20,3 +20,5 @@ htmlcov/
 *.tar.gz
 *.zip
 *.log
+
+addons/pos_bcv_multi_currency_oldd/

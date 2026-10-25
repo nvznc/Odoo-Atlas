@@ -333,40 +333,144 @@ class PosSession(models.Model):
             self.cash_register_balance_end_real_bcv = counted_cash_bcv
         return result
 
-    def get_closing_control_data(self) -> dict:
-        """Añade los detalles de la caja en Bs a los datos de cierre del PdV."""
-        data = super().get_closing_control_data()
-        if self.bcv_cash_control:
-            method = self.payment_method_ids.filtered(
-                lambda payment_method: (
-                    payment_method.is_cash_count
-                    and payment_method.journal_id == self.bcv_cash_journal_id
-                )
-            )[:1]
-            payments = self._get_closed_orders().payment_ids.filtered(
-                lambda payment: payment.payment_method_id == method
+    def _get_cash_payment_methods(self) -> models.Model:
+        """Devuelve los métodos de pago configurados como efectivo."""
+        return self.payment_method_ids.filtered("is_cash_count")
+
+    def _get_default_cash_method(self) -> models.Model:
+        """Elige la caja principal, priorizando la moneda de la sesión."""
+        cash_methods = self._get_cash_payment_methods()
+        return (
+            cash_methods.filtered(lambda method: method.currency_id == self.currency_id)[:1]
+            or cash_methods[:1]
+        )
+
+    def _get_bcv_cash_method(self) -> models.Model:
+        """Devuelve el método de efectivo asociado al diario en bolívares."""
+        cash_methods = self._get_cash_payment_methods()
+        if not self.bcv_cash_journal_id:
+            return cash_methods.browse()
+        return cash_methods.filtered(lambda method: method.journal_id == self.bcv_cash_journal_id)[
+            :1
+        ]
+
+    def _get_cash_lines(self, journal: models.Model) -> models.Model:
+        """Devuelve las líneas de extracto de un diario concreto."""
+        if not journal:
+            return self.statement_line_ids.browse()
+        return (
+            self.sudo()
+            .statement_line_ids.filtered(lambda line: line.journal_id == journal)
+            .sorted("create_date")
+        )
+
+    def _get_cash_moves(self, journal: models.Model) -> list[dict]:
+        """Devuelve los movimientos de caja de un diario concreto."""
+        cash_in_count = 0
+        cash_out_count = 0
+        cash_in_out_list = []
+        for line in self._get_cash_lines(journal):
+            if line.amount > 0:
+                cash_in_count += 1
+                name = f"Cash in {cash_in_count}"
+            else:
+                cash_out_count += 1
+                name = f"Cash out {cash_out_count}"
+            cash_in_out_list.append(
+                {
+                    "name": line.payment_ref or name,
+                    "amount": line.amount,
+                    "id": line.id,
+                    "date": line.create_date,
+                    "cashier_name": self._get_cash_move_cashier_name(line),
+                }
             )
-            lines = self.statement_line_ids.filtered(
-                lambda line: line.journal_id == self.bcv_cash_journal_id
+        return cash_in_out_list
+
+    def _to_bcv_amount(self, payment: models.Model, currency: models.Model) -> float:
+        """Convierte un pago a bolívares usando el importe guardado en Bs."""
+        if payment.payment_currency_id == currency:
+            return payment.payment_amount or 0.0
+        rate = self.bcv_rate or payment.payment_rate or 1.0
+        return currency.round((payment.amount or 0.0) * rate)
+
+    def get_closing_control_data(self) -> dict:
+        """Añade monedas por método y los detalles de la caja en Bs."""
+        data = super().get_closing_control_data()
+        orders = self._get_closed_orders()
+        payments = orders.payment_ids.filtered(
+            lambda payment: payment.payment_method_id.type != "pay_later"
+        )
+        bcv_currency = self.bcv_currency_id
+        default_cash_method = self._get_default_cash_method()
+        bcv_cash_method = self._get_bcv_cash_method()
+
+        if default_cash_method:
+            cash_payments = payments.filtered(
+                lambda payment, method=default_cash_method: payment.payment_method_id == method
+            )
+            default_cash_lines = self._get_cash_lines(default_cash_method.journal_id)
+            data["default_cash_details"] = {
+                "name": default_cash_method.name,
+                "amount": self.cash_register_balance_start
+                + sum(cash_payments.mapped("amount"))
+                + sum(default_cash_lines.mapped("amount")),
+                "opening": self.cash_register_balance_start,
+                "payment_amount": sum(cash_payments.mapped("amount")),
+                "moves": self._get_cash_moves(default_cash_method.journal_id),
+                "id": default_cash_method.id,
+                "currency_id": default_cash_method.currency_id.id or self.currency_id.id,
+            }
+        else:
+            data["default_cash_details"] = {}
+
+        non_cash_methods = (
+            self.payment_method_ids - default_cash_method
+            if default_cash_method
+            else self.payment_method_ids
+        )
+        non_cash_payment_methods = []
+        for method in non_cash_methods:
+            if self.bcv_cash_control and bcv_cash_method and method == bcv_cash_method:
+                continue
+            method_payments = orders.payment_ids.filtered(
+                lambda payment, method=method: payment.payment_method_id == method
+            )
+            currency = method.currency_id or method.journal_id.currency_id or self.currency_id
+            if bcv_currency and currency == bcv_currency:
+                amount = sum(
+                    self._to_bcv_amount(payment, bcv_currency) for payment in method_payments
+                )
+            else:
+                amount = sum(method_payments.mapped("amount"))
+            non_cash_payment_methods.append(
+                {
+                    "name": method.name,
+                    "amount": amount,
+                    "amount_company": sum(method_payments.mapped("amount")),
+                    "number": len(method_payments),
+                    "id": method.id,
+                    "type": method.type,
+                    "currency_id": currency.id,
+                }
+            )
+        data["non_cash_payment_methods"] = non_cash_payment_methods
+
+        if self.bcv_cash_control and bcv_cash_method:
+            bcv_payments = payments.filtered(
+                lambda payment, method=bcv_cash_method: payment.payment_method_id == method
             )
             data["bcv_cash_details"] = {
-                "name": method.name,
+                "name": bcv_cash_method.name,
                 "amount": self.cash_register_balance_end_bcv,
                 "opening": self.cash_register_balance_start_bcv,
-                "payment_amount": sum(payments.mapped("payment_amount")),
-                "moves": [
-                    {
-                        "name": line.payment_ref or line.name,
-                        "amount": line.amount,
-                    }
-                    for line in lines
-                ],
-                "id": method.id,
-                "currency_id": self.bcv_currency_id.id,
+                "payment_amount": sum(
+                    self._to_bcv_amount(payment, bcv_currency) for payment in bcv_payments
+                ),
+                "moves": self._get_cash_moves(self.bcv_cash_journal_id),
+                "id": bcv_cash_method.id,
+                "currency_id": bcv_currency.id,
             }
-            data["non_cash_payment_methods"] = [
-                item for item in data.get("non_cash_payment_methods", []) if item["id"] != method.id
-            ]
         return data
 
     def _validate_session(
