@@ -55,7 +55,7 @@ jobs:
             -v "${ADDONS_PATH}:/mnt/extra-addons" \
             odoo:19.0 \
             odoo -d odoo_test \
-              -i currency_rate_bcv,pos_bcv_multi_currency \
+              -i currency_rate_bcv,pos_bcv_multi_currency,pos_kitchen_direct_print \
               --test-enable \
               --log-level=test \
               --stop-after-init

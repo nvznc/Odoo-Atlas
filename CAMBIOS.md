@@ -665,3 +665,80 @@ docker exec odoo sh -lc 'odoo -d odoo_prep_display_test -u pos_preparation_displ
   pequeñas, sin cambios funcionales, para cumplir la complejidad máxima del CI.
 - Se documentaron clases y métodos públicos del addon.
 - Tests posteriores a la refactorización: `11/11 OK`.
+
+---
+
+## 12. Módulo POS Kitchen Direct Print (jIotBox) (2026-10-25)
+
+Se agregó el addon local `addons/pos_kitchen_direct_print` (`19.0.1.0.0`,
+licencia `LGPL-3`) como implementación clean-room para Odoo 19 Community. No
+contiene código del módulo OPL-1 `c_direct_pos_kitchen` ni requiere Odoo IoT Box.
+
+### 12.1 Funcionalidad
+
+- Nuevo tipo de impresora de preparación `Direct print (jIotBox)`.
+- URL del agente jIotBox validada y normalizada en el servidor:
+  HTTP/HTTPS, sin credenciales, sin query string/fragmento, longitud limitada,
+  IPv6 entre corchetes y HTTPS por defecto.
+- Las comandas se renderizan como imagen JPEG en el navegador y se envían al
+  endpoint local `/hw_proxy/default_printer_action` del jIotBox.
+- `JiotBoxPrinter` extiende `HWPrinter` y usa `fetch` para soportar
+  `targetAddressSpace`/LNA; timeout de 15 segundos y errores estructurados.
+- URL opcional para tickets de cliente en `pos.config`; si jIotBox y Epson están
+  configurados, jIotBox tiene prioridad y la UI lo advierte.
+- No se realizan llamadas de red desde el servidor Odoo: el navegador del POS
+  habla directamente con el agente local.
+
+### 12.2 Archivos principales
+
+- `__manifest__.py`, `models/jiotbox_url.py`, `models/pos_printer.py`,
+  `models/pos_config.py`, `models/res_config_settings.py`.
+- `views/pos_printer_views.xml`, `views/pos_config_views.xml`,
+  `views/res_config_settings_views.xml`.
+- `static/src/app/utils/printer/jiotbox_printer.js`,
+  `static/src/app/services/pos_store_patch.js`.
+- `tests/test_jiotbox_url.py`, `tests/test_pos_printer.py`.
+- `README.rst` con instalación, configuración, arquitectura, seguridad y
+  limitaciones.
+
+### 12.3 Pruebas realizadas
+
+- Base desechable creada desde cero e instalación de `pos_kitchen_direct_print`.
+- Tests dirigidos: `27/27 OK` (`0 failed, 0 error(s)`), incluyendo 16 pruebas de
+  normalización de URL, 6 de `pos.printer` y 5 de `pos.config`.
+- `ruff check` y `ruff format --check`: OK, 10 archivos.
+- `compileall`: OK.
+- XML de las 3 vistas: bien formado.
+- `node --check` sobre los 2 archivos JS: OK.
+- La base desechable se eliminó después de las pruebas.
+
+Comando usado:
+
+```bash
+docker exec odoo bash -lc 'odoo -d odoo_jiotbox_final3 \
+  -i pos_kitchen_direct_print \
+  --test-enable --test-tags=/pos_kitchen_direct_print \
+  --stop-after-init --no-http --http-port=8073 \
+  --db_host="$HOST" --db_port="$PORT" --db_user="$USER" \
+  --db_password="$PASSWORD" --log-level=test'
+```
+
+### 12.4 Producción y CI
+
+- Verificado en la base de producción `odoo`: el módulo está `installed` en
+  `19.0.1.0.0`; las vistas de impresoras, POS y ajustes están creadas.
+- Se agregó el módulo al job `odoo-tests` de `.github/workflows/ci.yml`, de modo
+  que el CI instala y ejecuta sus tests junto con los addons BCV.
+- Se actualizó el README raíz con el enlace al addon y a esta sección.
+
+### 12.5 Pendientes
+
+1. Validar la impresión real con el jIotBox y la impresora USB/local definitivos,
+   incluyendo HTTPS autofirmado, CORS y el comportamiento de LNA.
+2. Confirmar el contrato de `base path` de jIotBox; actualmente se documenta que
+   requiere un reverse proxy que enrute el prefijo.
+3. Añadir tests JS (QUnit/Hoot) para normalización de URL, timeout, mapeo de
+   errores, `createPrinter` y la prioridad Epson/jIotBox.
+4. Definir si se permite HTTP y cualquier host, o si se restringe a HTTPS y
+   rangos de red privados.
+5. Extraer la normalización duplicada de `create`/`write` en un helper común.
