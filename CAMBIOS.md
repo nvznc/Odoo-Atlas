@@ -3,13 +3,13 @@
 Documento de traspaso para otras sesiones de trabajo. Resume qué se cambió, por qué,
 cómo se probó, cómo se desplegó y cómo se subió a GitHub.
 
-- **Fecha:** 2026-10-23
+- **Fecha:** 2026-10-25
 - **Repositorio:** <https://github.com/nvznc/Odoo-Atlas>
 - **Remoto SSH:** `git@github.com:nvznc/Odoo-Atlas.git`
 - **Rama:** `main`
-- **Último commit de código:** `cbb6e7b`
+- **Último commit de código:** `265aa2d`
 - **Producción:** Odoo `19.0-20261015`, base de datos `odoo`
-- **Estado:** contenedores healthy, HTTP 200, módulo POS en `19.0.1.0.2`
+- **Estado:** contenedores healthy, HTTP 200, módulo POS en `19.0.1.0.4`
 
 > Nota: `.env`, `backups/`, credenciales y archivos de datos **no** están en GitHub.
 > El detalle técnico de la auditoría está en `AUDIT_DEPLOY_20261023.md`.
@@ -468,14 +468,14 @@ curl -s -o /dev/null -w "%{http_code}\n" http://localhost:8069/web/database/sele
 ### 9.1 Estado actual
 
 - Producción `odoo` operativa.
-- `pos_bcv_multi_currency` en `19.0.1.0.2`.
+- `pos_bcv_multi_currency` en `19.0.1.0.4`.
 - `currency_rate_bcv` en `19.0.1.0.0`.
-- Último commit de código en GitHub: `f397f6f`.
+- Último commit de código en GitHub: `265aa2d`.
 - `pos_preparation_display_atlas` está instalado en producción (`odoo`, versión
   `19.0.1.0.0`) y en la base de prueba.
 - El bundle del POS con la corrección es `/web/assets/9f12006/point_of_sale._assets_pos.min.js`.
-- Los tests de Python del módulo de preparación están en 10/10; los tests de los
-  addons BCV siguen en 14/14.
+- Los tests de Python del módulo de preparación están en 10/10 y los de
+  `pos_bcv_multi_currency` en 8/8.
 - Pantalla de producción creada: `Cocina`, para los POS `Restaurante` y `Bar`, con
   las categorías de comida y excluyendo `Bebidas` y `Cafes y Tes`.
 
@@ -742,3 +742,82 @@ docker exec odoo bash -lc 'odoo -d odoo_jiotbox_final3 \
 4. Definir si se permite HTTP y cualquier host, o si se restringe a HTTPS y
    rangos de red privados.
 5. Extraer la normalización duplicada de `create`/`write` en un helper común.
+
+---
+
+## 13. Mejoras de cierre y reporte BCV (2026-10-25)
+
+Se completaron los cambios locales de `addons/pos_bcv_multi_currency` y se
+publicaron en el commit `265aa2d` (`Add BCV closing cash breakdown and session
+report`). La versión del addon quedó en `19.0.1.0.4`. No se modificó la tasa, el
+flujo de cobro ni la validación de pagos existente; los cambios separan y
+presentan la información de cierre y del reporte de sesión.
+
+### 13.1 Funcionalidad
+
+- El cierre de sesión separa la caja principal de la caja en bolívares.
+- `get_closing_control_data` devuelve la moneda real de cada método, los pagos
+  esperados, la apertura y los movimientos filtrados por diario.
+- El popup de cierre muestra la caja Bs, permite contar bolívares, calcula su
+  diferencia y convierte las diferencias de métodos bancarios en Bs a la moneda
+  de la compañía antes de enviarlas al backend.
+- Los métodos no efectivo se muestran en la moneda configurada para el método,
+  no en la moneda de la sesión.
+- El reporte de detalles de sesión agrega la sección `Pagos en Bs`, con tasa,
+  fecha de tasa, desglose por método y total en bolívares.
+- El reporte identifica la sesión cuando se consolidan varias sesiones.
+- Se agregó el backup local `addons/pos_bcv_multi_currency_oldd/` a `.gitignore`
+  para evitar que se versione por error.
+
+### 13.2 Archivos principales
+
+- `models/pos_session.py`: datos de cierre, cajas por diario y conversión a Bs.
+- `models/report_sale_details.py`: nuevo desglose BCV del reporte de sesión.
+- `views/report_saledetails_bcv.xml`: plantilla de `Pagos en Bs`.
+- `static/src/app/components/popups/closing_popup/closing_popup.js` y `.xml`:
+  conteo, diferencias y visualización de la caja Bs.
+- `tests/test_pos_bcv.py`: prueba de cierre con caja USD, caja Bs y tarjeta Bs;
+  prueba del reporte de sesión.
+- `__manifest__.py` y `models/__init__.py`: versión `19.0.1.0.4` y registro del
+  nuevo modelo/vista.
+- `.gitignore`: exclusión del backup `_oldd`.
+
+### 13.3 Pruebas realizadas
+
+- `ruff check .` y `ruff format --check .`: OK, 62 archivos.
+- `compileall` del addon: OK.
+- XML de las vistas: bien formado.
+- `node --check` del popup JS: OK.
+- Base desechable `odoo_bcv_audit` creada desde cero; instalación de
+  `currency_rate_bcv,pos_bcv_multi_currency` y actualización posterior: OK.
+- Tests dirigidos: `8/8 OK` (`0 failed, 0 error(s)`), incluyendo el nuevo test de
+  `get_closing_control_data`.
+- `git diff --check`: sin errores.
+
+Comando usado:
+
+```bash
+docker exec odoo bash -lc 'odoo -d odoo_bcv_audit \
+  -u pos_bcv_multi_currency \
+  --test-enable --test-tags=/pos_bcv_multi_currency \
+  --stop-after-init --no-http --http-port=8074 \
+  --db_host="$HOST" --db_port="$PORT" --db_user="$USER" \
+  --db_password="$PASSWORD" --log-level=test'
+```
+
+### 13.4 Producción y CI
+
+- Las bases `odoo` y `odoo_pos_test` ya tenían `pos_bcv_multi_currency` en
+  `19.0.1.0.4`; no se requiere un upgrade adicional por este cambio.
+- El workflow de CI ya instala `pos_bcv_multi_currency` y ejecutará sus tests en
+  el próximo push a `main`.
+- El cambio se publica junto con la documentación; no se incluyó el backup
+  `_oldd` en Git.
+
+### 13.5 Pendientes
+
+1. Añadir pruebas JS (QUnit/Hoot) para el conteo y las diferencias de la caja Bs
+   en el popup de cierre.
+2. Cubrir con un test el caso de varias sesiones con monedas BCV distintas; el
+   reporte usa la primera moneda para el formato global.
+3. Recargar las terminales POS si se reemplaza el bundle en producción.
