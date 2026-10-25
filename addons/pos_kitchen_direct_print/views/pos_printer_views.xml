@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="view_pos_printer_form_jiotbox" model="ir.ui.view">
+        <field name="name">pos.printer.form.jiotbox</field>
+        <field name="model">pos.printer</field>
+        <field name="inherit_id" ref="point_of_sale.view_pos_printer_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='epson_printer_ip']" position="after">
+                <field
+                    name="jiotbox_url"
+                    invisible="printer_type != 'jiotbox'"
+                    placeholder="https://192.168.1.50:8443"
+                />
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_pos_printer_list_jiotbox" model="ir.ui.view">
+        <field name="name">pos.printer.list.jiotbox</field>
+        <field name="model">pos.printer</field>
+        <field name="inherit_id" ref="point_of_sale.view_pos_printer" />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='proxy_ip']" position="after">
+                <field name="jiotbox_url" optional="hide" />
+            </xpath>
+        </field>
+    </record>
+</odoo>
