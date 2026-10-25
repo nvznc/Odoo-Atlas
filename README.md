@@ -14,3 +14,4 @@ Repositorio del proyecto Odoo Atlas.
 - `pos_preparation_display_atlas`: pantalla de preparación y estado público de pedidos
   para Odoo 19 Community. Ver el [README del addon](addons/pos_preparation_display_atlas/README.md)
   y la sección 11 de [CAMBIOS.md](CAMBIOS.md#11-módulo-pos-preparation-display-2026-10-23).
+- `Atlas-box`: Aplicación escrita en C# para capturar las impresoras conectadas via usb y virtualizarlas como IP
