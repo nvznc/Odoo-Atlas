@@ -20,7 +20,7 @@ namespace JPosBox
         public AppConfig()
         {
             Dir = ResolveDir();
-            FilePath = Path.Combine(Dir, "jposbox.ini");
+            FilePath = Path.Combine(Dir, "atlasbox.ini");
             Load();
 
             if (!File.Exists(FilePath))
@@ -54,7 +54,7 @@ namespace JPosBox
 
             return Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                "jPosBox");
+                "Atlas-Box");
         }
 
         public void Load()
