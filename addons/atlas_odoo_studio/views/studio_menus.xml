@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem
+        id="menu_atlas_studio_root"
+        name="Atlas Studio"
+        sequence="90"
+        groups="atlas_odoo_studio.group_studio_designer"
+    />
+
+    <menuitem
+        id="menu_atlas_studio_editor"
+        groups="atlas_odoo_studio.group_studio_designer"
+        name="Editor"
+        parent="menu_atlas_studio_root"
+        action="action_studio_editor"
+        sequence="10"
+    />
+
+    <menuitem
+        id="menu_atlas_studio_customizations"
+        groups="atlas_odoo_studio.group_studio_designer"
+        name="Personalizaciones"
+        parent="menu_atlas_studio_root"
+        action="action_studio_customization"
+        sequence="20"
+    />
+
+    <menuitem
+        id="menu_atlas_studio_audit"
+        groups="atlas_odoo_studio.group_studio_designer"
+        name="Auditoría"
+        parent="menu_atlas_studio_root"
+        action="action_studio_audit_log"
+        sequence="30"
+    />
+</odoo>

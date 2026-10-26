@@ -19,3 +19,6 @@ Repositorio del proyecto Odoo Atlas.
   impresoras locales/USB mediante jIotBox, sin IoT Box. Ver el
   [README del addon](addons/pos_kitchen_direct_print/README.rst) y la sección 12
   de [CAMBIOS.md](CAMBIOS.md#12-módulo-pos-kitchen-direct-print-jiotbox-2026-10-25).
+- `atlas_odoo_studio`: editor visual clean-room para modelos, campos, vistas,
+  menús y permisos en Odoo 19 Community. Ver la sección 14 de
+  [CAMBIOS.md](CAMBIOS.md#14-addon-atlas-odoo-studio-2026-10-26).

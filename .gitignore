@@ -9,6 +9,7 @@ venv/
 ENV/
 
 backups/
+var/
 .ruff_cache/
 .pytest_cache/
 .mypy_cache/

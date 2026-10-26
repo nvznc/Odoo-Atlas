@@ -1,0 +1,342 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="atlas_odoo_studio.ArchNode">
+        <div class="o_atlas_node">
+            <div class="o_atlas_node_line" t-att-class="{'o_atlas_node_selected': isSelected}" t-on-click="select">
+                <span class="o_atlas_node_caret" t-if="props.node.children.length">&#9662;</span>
+                <span class="o_atlas_node_caret o_atlas_node_caret_empty" t-else=""/>
+                <span class="o_atlas_node_tag">&lt;<t t-esc="props.node.tag"/>&gt;</span>
+                <span class="o_atlas_node_name" t-if="props.node.attrs.name" t-esc="props.node.attrs.name"/>
+                <span class="o_atlas_node_string" t-if="props.node.attrs.string" t-esc="props.node.attrs.string"/>
+            </div>
+            <div class="o_atlas_node_children" t-if="props.node.children.length">
+                <ArchNode t-foreach="props.node.children" t-as="child" t-key="child.id" node="child"/>
+            </div>
+        </div>
+    </t>
+
+    <t t-name="atlas_odoo_studio.StudioEditor">
+        <div class="o_atlas_studio">
+            <header class="o_atlas_topbar">
+                <div class="o_atlas_topbar_left">
+                    <button type="button" class="o_atlas_icon_button" title="Cerrar" t-on-click="close">
+                        <i class="fa fa-times"/>
+                    </button>
+                    <span class="o_atlas_brand">
+                        <i class="fa fa-magic"/>
+                        <span>Atlas Studio</span>
+                    </span>
+                </div>
+
+                <div class="o_atlas_topbar_center">
+                    <label class="o_atlas_select_group">
+                        <span>Modelo</span>
+                        <select class="o_input o_atlas_select" t-model="state.model" t-on-change="onModelChange">
+                            <option t-foreach="models" t-as="item" t-key="item.model" t-att-value="item.model">
+                                <t t-esc="item.name"/> (<t t-esc="item.model"/>)
+                            </option>
+                        </select>
+                    </label>
+
+                    <div class="o_atlas_view_tabs">
+                        <button type="button" t-foreach="viewTypes" t-as="viewType" t-key="viewType.value"
+                                class="o_atlas_view_tab"
+                                t-att-class="{'o_active': state.viewType === viewType.value}"
+                                t-on-click="() => this.onViewTypeChange(viewType.value)">
+                            <t t-esc="viewType.label"/>
+                        </button>
+                    </div>
+
+                    <label class="o_atlas_select_group" t-if="state.views.length > 1">
+                        <span>Vista base</span>
+                        <select class="o_input o_atlas_select" t-on-change="onBaseViewChange">
+                            <option t-foreach="state.views" t-as="view" t-key="view.id"
+                                    t-att-value="view.id" t-att-selected="view.id === state.baseViewId">
+                                <t t-esc="view.name"/>
+                            </option>
+                        </select>
+                    </label>
+                </div>
+
+                <div class="o_atlas_topbar_right">
+                    <span class="o_atlas_status" t-if="state.customization">
+                        <span class="o_atlas_badge o_atlas_badge_info">v<t t-esc="state.customization.version"/></span>
+                        <span class="o_atlas_badge o_atlas_badge_success" t-if="!state.dirty">Guardado</span>
+                        <span class="o_atlas_badge o_atlas_badge_warning" t-else="">Sin guardar</span>
+                    </span>
+                    <button type="button" class="o_atlas_icon_button" title="Deshacer"
+                            t-att-disabled="!canUndo" t-on-click="() => this.studio.undo()">
+                        <i class="fa fa-undo"/>
+                    </button>
+                    <button type="button" class="o_atlas_icon_button" title="Rehacer"
+                            t-att-disabled="!canRedo" t-on-click="() => this.studio.redo()">
+                        <i class="fa fa-repeat"/>
+                    </button>
+                    <button type="button" class="o_atlas_button" title="Recargar" t-on-click="refresh">
+                        <i class="fa fa-refresh"/>
+                    </button>
+                    <button type="button" class="o_atlas_button o_atlas_button_primary"
+                            t-att-disabled="!state.dirty or state.loading" t-on-click="save">
+                        <i class="fa fa-save"/>
+                        <span>Guardar</span>
+                    </button>
+                </div>
+            </header>
+
+            <div class="o_atlas_alert" t-if="state.error">
+                <i class="fa fa-exclamation-triangle"/>
+                <span t-esc="state.error"/>
+                <button type="button" class="o_atlas_icon_button" title="Descartar"
+                        t-on-click="clearError">
+                    <i class="fa fa-times"/>
+                </button>
+            </div>
+
+            <div class="o_atlas_loading" t-if="state.loading">
+                <i class="fa fa-circle-o-notch fa-spin"/>
+            </div>
+
+            <main class="o_atlas_body">
+                <aside class="o_atlas_panel o_atlas_left">
+                    <div class="o_atlas_panel_header">
+                        <span>Campos</span>
+                        <div class="o_atlas_panel_actions">
+                            <button type="button" class="o_atlas_button o_atlas_button_small"
+                                    t-on-click="() => this.studio.toggleNewField()">
+                                <i class="fa fa-plus"/>
+                                <span>Campo</span>
+                            </button>
+                            <button type="button" class="o_atlas_button o_atlas_button_small"
+                                    t-on-click="() => this.studio.toggleNewModel()">
+                                <i class="fa fa-cube"/>
+                                <span>App</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <form class="o_atlas_form" t-if="state.showNewField" t-on-submit.prevent="() => this.studio.createField()">
+                        <div class="o_atlas_form_title">Nuevo campo</div>
+                        <label>
+                            <span>Etiqueta</span>
+                            <input class="o_input" t-model="state.newField.label" required="required"/>
+                        </label>
+                        <label>
+                            <span>Nombre técnico</span>
+                            <div class="o_atlas_inline">
+                                <input class="o_input" t-model="state.newField.name" placeholder="x_sr_..." required="required"/>
+                                <button type="button" class="o_atlas_button o_atlas_button_small"
+                                        title="Generar desde la etiqueta" t-on-click="suggestFieldName">x_</button>
+                            </div>
+                        </label>
+                        <label>
+                            <span>Tipo</span>
+                            <select class="o_input" t-model="state.newField.ttype">
+                                <option t-foreach="fieldTypes" t-as="type" t-key="type.value" t-att-value="type.value">
+                                    <t t-esc="type.label"/>
+                                </option>
+                            </select>
+                        </label>
+                        <label t-if="isRelational">
+                            <span>Modelo relacionado</span>
+                            <select class="o_input" t-model="state.newField.relation">
+                                <option value="">Selecciona...</option>
+                                <option t-foreach="models" t-as="item" t-key="item.model" t-att-value="item.model">
+                                    <t t-esc="item.name"/> (<t t-esc="item.model"/>)
+                                </option>
+                            </select>
+                        </label>
+                        <label t-if="isOne2Many">
+                            <span>Campo inverso (many2one)</span>
+                            <input class="o_input" t-model="state.newField.relationField" placeholder="x_sr_..."/>
+                        </label>
+                        <label t-if="isSelection">
+                            <span>Opciones (valor|etiqueta por línea)</span>
+                            <textarea class="o_input" rows="3" t-model="state.newField.selectionText"
+                                      placeholder="draft|Borrador"/>
+                        </label>
+                        <div class="o_atlas_checkboxes">
+                            <label>
+                                <input type="checkbox" t-model="state.newField.required"/>
+                                <span>Obligatorio</span>
+                            </label>
+                            <label>
+                                <input type="checkbox" t-model="state.newField.readonly"/>
+                                <span>Solo lectura</span>
+                            </label>
+                        </div>
+                        <div class="o_atlas_form_actions">
+                            <button type="button" class="o_atlas_button"
+                                    t-on-click="() => this.studio.toggleNewField()">Cancelar</button>
+                            <button type="submit" class="o_atlas_button o_atlas_button_primary"
+                                    t-att-disabled="state.loading">Crear campo</button>
+                        </div>
+                    </form>
+
+                    <form class="o_atlas_form" t-if="state.showNewModel" t-on-submit.prevent="() => this.studio.createModel()">
+                        <div class="o_atlas_form_title">Nueva app</div>
+                        <label>
+                            <span>Nombre de la app</span>
+                            <input class="o_input" t-model="state.newModel.label" required="required"/>
+                        </label>
+                        <label>
+                            <span>Nombre técnico (opcional)</span>
+                            <div class="o_atlas_inline">
+                                <input class="o_input" t-model="state.newModel.name" placeholder="x_sr_mi_app"/>
+                                <button type="button" class="o_atlas_button o_atlas_button_small"
+                                        title="Generar desde el nombre" t-on-click="suggestModelName">x_</button>
+                            </div>
+                        </label>
+                        <label>
+                            <span>Descripción</span>
+                            <textarea class="o_input" rows="2" t-model="state.newModel.description"/>
+                        </label>
+                        <div class="o_atlas_form_actions">
+                            <button type="button" class="o_atlas_button"
+                                    t-on-click="() => this.studio.toggleNewModel()">Cancelar</button>
+                            <button type="submit" class="o_atlas_button o_atlas_button_primary"
+                                    t-att-disabled="state.loading">Crear app</button>
+                        </div>
+                    </form>
+
+                    <input class="o_input o_atlas_search" type="search" placeholder="Buscar campo..."
+                           t-model="state.fieldSearch"/>
+
+                    <div class="o_atlas_field_list">
+                        <div class="o_atlas_field_row" t-foreach="filteredFields" t-as="field" t-key="field.name">
+                            <button type="button" class="o_atlas_field"
+                                    t-att-title="`${field.name} (${field.ttype})`"
+                                    t-on-click="() => this.studio.addField(field.name)">
+                                <span class="o_atlas_field_main">
+                                    <span class="o_atlas_field_label" t-esc="field.string"/>
+                                    <span class="o_atlas_field_name" t-esc="field.name"/>
+                                </span>
+                                <span class="o_atlas_field_meta">
+                                    <span class="o_atlas_badge" t-esc="field.ttype"/>
+                                    <span class="o_atlas_badge o_atlas_badge_info" t-if="field.manual">manual</span>
+                                </span>
+                            </button>
+                            <button type="button" class="o_atlas_icon_button o_atlas_danger" t-if="field.manual and field.id"
+                                    title="Eliminar campo"
+                                    t-on-click.stop="() => this.studio.deleteField(field.id, field.name)">
+                                <i class="fa fa-trash"/>
+                            </button>
+                        </div>
+                        <div class="o_atlas_empty" t-if="!filteredFields.length">
+                            <i class="fa fa-search"/>
+                            <p>Sin campos que coincidan.</p>
+                        </div>
+                    </div>
+                </aside>
+
+                <section class="o_atlas_canvas">
+                    <div class="o_atlas_canvas_header">
+                        <div class="o_atlas_canvas_title">
+                            <i class="fa fa-sitemap"/>
+                            <span t-if="state.selectedNode">
+                                <t t-esc="state.selectedNode.tag"/>
+                                <span class="o_atlas_muted" t-if="state.selectedNode.attrs.name">
+                                    · <t t-esc="state.selectedNode.attrs.name"/>
+                                </span>
+                            </span>
+                            <span class="o_atlas_muted" t-else="">Selecciona un nodo de la vista</span>
+                        </div>
+                        <label class="o_atlas_inline">
+                            <span>Insertar</span>
+                            <select class="o_input o_atlas_select_small" t-model="state.addPosition">
+                                <option value="after">Después</option>
+                                <option value="inside">Dentro</option>
+                                <option value="before">Antes</option>
+                            </select>
+                        </label>
+                    </div>
+
+                    <div class="o_atlas_tree" t-if="state.tree">
+                        <ArchNode node="state.tree"/>
+                    </div>
+                    <div class="o_atlas_empty o_atlas_empty_large" t-else="">
+                        <i class="fa fa-sitemap"/>
+                        <p>Cargando la estructura de la vista...</p>
+                    </div>
+
+                    <div class="o_atlas_attributes" t-if="state.selectedNode">
+                        <div class="o_atlas_attributes_header">
+                            <span>Propiedades del nodo</span>
+                            <span class="o_atlas_path" t-esc="state.selectedPath"/>
+                        </div>
+                        <div class="o_atlas_attributes_grid">
+                            <label>
+                                <span>Etiqueta (string)</span>
+                                <input class="o_input" t-model="state.attrForm.string" placeholder="Etiqueta visible"/>
+                            </label>
+                            <label>
+                                <span>Widget</span>
+                                <input class="o_input" t-model="state.attrForm.widget" placeholder="Ej. boolean_toggle"/>
+                            </label>
+                        </div>
+                        <div class="o_atlas_checkboxes">
+                            <label>
+                                <input type="checkbox" t-model="state.attrForm.required"/>
+                                <span>Obligatorio</span>
+                            </label>
+                            <label>
+                                <input type="checkbox" t-model="state.attrForm.readonly"/>
+                                <span>Solo lectura</span>
+                            </label>
+                            <label>
+                                <input type="checkbox" t-model="state.attrForm.invisible"/>
+                                <span>Invisible</span>
+                            </label>
+                        </div>
+                        <div class="o_atlas_form_actions">
+                            <button type="button" class="o_atlas_button o_atlas_button_danger"
+                                    t-att-disabled="state.selectedNode.depth === 0"
+                                    t-on-click="() => this.studio.removeSelected()">
+                                <i class="fa fa-trash"/>
+                                <span>Eliminar nodo</span>
+                            </button>
+                            <button type="button" class="o_atlas_button o_atlas_button_primary"
+                                    t-on-click="() => this.studio.applyAttributes()">
+                                <i class="fa fa-check"/>
+                                <span>Aplicar atributos</span>
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <aside class="o_atlas_panel o_atlas_right">
+                    <div class="o_atlas_tabs">
+                        <button type="button" class="o_atlas_tab"
+                                t-att-class="{'o_active': ui.panel === 'operations'}"
+                                t-on-click="() => this.setPanel('operations')">Operaciones</button>
+                        <button type="button" class="o_atlas_tab"
+                                t-att-class="{'o_active': ui.panel === 'xml'}"
+                                t-on-click="() => this.setPanel('xml')">XML</button>
+                    </div>
+                    <div class="o_atlas_panel_content" t-if="ui.panel === 'operations'">
+                        <div class="o_atlas_operations" t-if="state.operations.length">
+                            <div class="o_atlas_operation" t-foreach="state.operations" t-as="operation"
+                                 t-key="operation_index">
+                                <span class="o_atlas_operation_index" t-esc="operation_index + 1"/>
+                                <div class="o_atlas_operation_body">
+                                    <span class="o_atlas_operation_type" t-esc="operation.op_type"/>
+                                    <span class="o_atlas_operation_target" t-esc="operation.target_xpath"/>
+                                    <span class="o_atlas_operation_meta" t-if="operationDetails(operation)"
+                                          t-esc="operationDetails(operation)"/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="o_atlas_empty" t-else="">
+                            <i class="fa fa-list-ul"/>
+                            <p>Sin cambios. Añade campos o modifica atributos para crear operaciones.</p>
+                        </div>
+                    </div>
+                    <div class="o_atlas_panel_content" t-if="ui.panel === 'xml'">
+                        <pre class="o_atlas_xml" t-esc="state.arch || 'Sin vista cargada.'"/>
+                    </div>
+                </aside>
+            </main>
+        </div>
+    </t>
+
+</templates>

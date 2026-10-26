@@ -3,13 +3,14 @@
 Documento de traspaso para otras sesiones de trabajo. Resume qué se cambió, por qué,
 cómo se probó, cómo se desplegó y cómo se subió a GitHub.
 
-- **Fecha:** 2026-10-25
+- **Fecha:** 2026-10-26
 - **Repositorio:** <https://github.com/nvznc/Odoo-Atlas>
 - **Remoto SSH:** `git@github.com:nvznc/Odoo-Atlas.git`
 - **Rama:** `main`
-- **Último commit de código:** `265aa2d`
+- **Commit anterior:** `c5bd9ea` (`Cambio nombre de path y .ini`)
 - **Producción:** Odoo `19.0-20261015`, base de datos `odoo`
-- **Estado:** contenedores healthy, HTTP 200, módulo POS en `19.0.1.0.4`
+- **Estado:** addon `atlas_odoo_studio` listo para instalación limpia; suite `43/43`
+  OK y auditoría independiente **APTO CON CAMBIOS** para instalación limpia.
 
 > Nota: `.env`, `backups/`, credenciales y archivos de datos **no** están en GitHub.
 > El detalle técnico de la auditoría está en `AUDIT_DEPLOY_20261023.md`.
@@ -821,3 +822,163 @@ docker exec odoo bash -lc 'odoo -d odoo_bcv_audit \
 2. Cubrir con un test el caso de varias sesiones con monedas BCV distintas; el
    reporte usa la primera moneda para el formato global.
 3. Recargar las terminales POS si se reemplaza el bundle en producción.
+
+---
+
+## 14. Addon Atlas-Odoo-Studio (2026-10-26)
+
+Se incorpora el addon `atlas_odoo_studio`, una implementación clean-room de un
+editor visual para Odoo 19 Community. El alcance es el MVP P0: modelos y campos
+manuales, extensiones de vistas, menús/acciones, permisos por grupo diseñador,
+auditoría y editor OWL. No contiene código, XML, assets ni nombres internos de
+Odoo Enterprise.
+
+### 14.1 Alcance funcional
+
+- Creación y borrado de modelos manuales con prefijo `x_sr_`, campo `x_name`,
+  vista form/list, acción, menú y ACL.
+- Creación de campos manuales con lista blanca de tipos: char, text, html,
+  integer, float, monetary, boolean, date, datetime, selection, many2one,
+  one2many, many2many y binary.
+- Validación de nombres, relaciones, selecciones, moneda, dominio y política
+  `on_delete`.
+- Edición de vistas mediante operaciones `add_node`, `set_attribute`,
+  `remove_node` y extensión generada por compañía.
+- Editor OWL con árbol de arquitectura, selección de nodos, pestaña XML, panel
+  de atributos, previsualización, guardado y rollback.
+- Auditoría de creación, modificación y borrado de artefactos.
+- Licencia LGPL-3 incluida en el addon.
+
+### 14.2 Modelos y servicios principales
+
+- `models/studio_customization.py`: personalización por modelo, tipo de vista,
+  vista base y compañía; protege campos generados/estructurales.
+- `models/studio_operation.py`: operaciones aplicadas a una personalización.
+- `models/studio_audit_log.py`: historial auditable con compañía y usuario.
+- `models/studio_customization.py` y `models/base.py`: integración con caché de
+  vistas y dominio de herencia.
+- `services/studio_metadata_service.py`: fachada de modelos/campos/ACL/menús.
+- `services/studio_field_service.py`: creación y validación de campos.
+- `services/studio_view_service.py`: compilación y guardado de extensiones.
+- `static/src/js/studio_action.js` y `studio_action.xml`: editor OWL.
+- `static/src/js/studio_service.js`: estado reactivo y RPC.
+- `static/src/js/studio_systray.js`: acceso desde el systray para diseñadores.
+
+### 14.3 Seguridad y auditoría aplicada
+
+Se corrigieron los hallazgos de la auditoría independiente:
+
+- **S1 — contexto falsificable:** se eliminó el bypass por `studio_internal`; la
+  protección usa `self.env.su` y `PROTECTED_FIELDS`/`STRUCTURAL_FIELDS`.
+- **S2 — auditoría pública:** `log_event` es `@api.private` y exige el grupo
+  diseñador.
+- **S3 — extensiones globales:** las claves de vista incluyen `company_id`; el
+  dominio de herencia filtra por compañía y contempla `key=False`.
+- **S4 — aislamiento multi-compañía:** los modelos generados reciben
+  `x_company_id` obligatorio, regla global `x_company_id in company_ids`,
+  defaults por compañía, hook `res.company.create` y pruebas de aislamiento.
+  `x_company_id` es un campo de sistema no borrable.
+- **S5 — directivas QWeb:** se rechazan todas las directivas `t-*` en nodos y
+  atributos.
+- **S6 — URL/XSS:** allowlist de esquemas `http`, `https`, `mailto` y `tel`.
+- **S7 — campos anidados:** validación recursiva de nodos y campos.
+- **S8 — dominios:** validación con `safe_eval`, límite de longitud y tipo
+  lista/tupla; test de dominio válido e inválido.
+- **S10 — propiedad de metadatos:** `studio_company_id` en `ir.model` e
+  `ir.model.fields`; creación/borrado bloqueado entre compañías y campos de
+  sistema `x_name`/`x_company_id` protegidos.
+- **S11 — claves estructurales:** no se pueden editar directamente desde RPC.
+- **S12 — CI:** el workflow instala el addon y excluye la suite UI que requiere
+  Chrome.
+- **S13-S16:** quedan como deuda de calidad/refactor, sin bloqueante funcional
+  para instalación limpia.
+
+Compatibilidad con datos previos:
+
+- Las bases de vista antiguas `atlas_odoo_studio.view_*` siguen visibles.
+- Las extensiones antiguas vinculadas a una personalización de la compañía se
+  siguen aplicando y, al volver a guardar, migran a la clave nueva con
+  `company_id`.
+- No se añadió migración automática para modelos `x_sr_*` creados antes de esta
+  versión; ver pendientes.
+
+### 14.4 Correcciones de UI y vistas
+
+- Se corrigió el bug por el que seleccionar un nodo actualizaba el estado pero
+  no repintaba: `studio.state` se creaba con `reactive()` sin callback y
+  `useService` devolvía el servicio plano. Los componentes ahora usan
+  `useState(this.studio.state)` y getters locales.
+- Se corrigió el fallo de los tests de vistas: las vistas base generadas usaban
+  la clave antigua y quedaban excluidas por el filtro multi-compañía. Ahora se
+  crean como `atlas_odoo_studio.{company_id}.view_...` y el dominio incluye
+  `key=False`.
+- La prueba UI se reescribió con IIFE async, polling y verificación de pestaña
+  XML, panel de atributos y clase de nodo seleccionado.
+
+### 14.5 Pruebas y validación
+
+- Suite completa del addon: **43/43 OK**, incluyendo tests de metadatos, vistas,
+  seguridad, auditoría y dos pruebas UI con Chrome headless.
+- Ruff: `All checks passed!`, 18 archivos formateados.
+- XML y JavaScript validados durante el desarrollo.
+- Auditoría independiente final: **APTO CON CAMBIOS para instalación limpia**.
+  Sin bloqueantes para una base nueva; los pendientes son de upgrade/legacy y
+  deuda de calidad.
+
+Comandos de referencia:
+
+```bash
+docker compose exec -T odoo bash -lc 'odoo server --http-port=8070 \
+  -d atlas_studio_test --db_host="$HOST" --db_port="$PORT" \
+  --db_user="$USER" --db_password="$PASSWORD" -u atlas_odoo_studio \
+  --test-enable --test-tags /atlas_odoo_studio --stop-after-init \
+  --log-level=test'
+
+docker compose exec -T odoo bash -lc 'cd /tmp/ruffcfg && \
+  /var/lib/odoo/.local/bin/ruff check atlas_odoo_studio && \
+  /var/lib/odoo/.local/bin/ruff format --check atlas_odoo_studio'
+```
+
+### 14.6 CI
+
+`.github/workflows/ci.yml` ahora instala `atlas_odoo_studio` junto con los addons
+BCV/impresión y excluye `atlas_studio_ui` del job estándar:
+
+```yaml
+-i currency_rate_bcv,pos_bcv_multi_currency,pos_kitchen_direct_print,atlas_odoo_studio
+--test-tags=-atlas_studio_ui
+```
+
+La suite UI queda disponible para ejecución local con Chrome/Chromium y
+`websocket-client`.
+
+### 14.7 Archivos incorporados
+
+- `addons/atlas_odoo_studio/` (modelos, servicios, seguridad, datos, vistas,
+  estáticos, tests y licencia).
+- `scripts/studio_dag.py`: orquestador DAG de subagentes usado durante el
+  desarrollo.
+- `.opencode/agent/studio-*.md`: definiciones de subagentes de análisis,
+  arquitectura y auditoría.
+- `.github/workflows/ci.yml`: instalación del addon y exclusión de UI.
+- `.gitignore`: exclusión de `var/`.
+- `CAMBIOS.md` y `README.md`: documentación del addon y del flujo de trabajo.
+
+### 14.8 Publicación
+
+Se actualizó la copia local con `git pull --rebase --autostash` hasta el commit
+remoto `c5bd9ea` antes de crear el commit de este addon. El remoto canónico es
+`git@github.com:nvznc/Odoo-Atlas.git`; el nombre
+`github.com/nvnznc/odoo-atlas` no existe en GitHub, por lo que se usa el remoto
+canónico existente.
+
+### 14.9 Pendientes
+
+1. **Alta, solo upgrade:** migrar modelos `x_sr_*` existentes antes de esta
+   versión para añadir `x_company_id`, defaults, regla y backfill de compañía.
+2. **Media:** tratar personalizaciones legacy con `company_id` nulo.
+3. **Media:** definir allowlist de modelos editables y política para campos
+   legacy sin `studio_company_id`.
+4. **Media:** cerrar S13-S16 (refactor de métodos largos, validaciones mutables
+   y cobertura adicional).
+5. Añadir un `README.md` específico del addon con instalación y capturas.

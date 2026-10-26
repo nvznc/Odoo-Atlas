@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_studio_customization_designer,studio.customization.designer,model_studio_customization,group_studio_designer,1,1,1,1
+access_studio_operation_designer,studio.operation.designer,model_studio_operation,group_studio_designer,1,1,1,1
+access_studio_audit_log_designer,studio.audit.log.designer,model_studio_audit_log,group_studio_designer,1,0,0,0

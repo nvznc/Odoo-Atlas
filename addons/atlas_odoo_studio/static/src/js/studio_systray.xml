@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="atlas_odoo_studio.SystrayItem">
+        <button type="button" class="o_atlas_systray" title="Abrir Atlas Studio"
+                t-if="state.visible" t-on-click="openStudio">
+            <i class="fa fa-magic"/>
+            <span class="o_atlas_systray_label">Studio</span>
+        </button>
+    </t>
+
+</templates>
