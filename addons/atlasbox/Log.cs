@@ -25,7 +25,7 @@ namespace JPosBox
             try
             {
                 Directory.CreateDirectory(dir);
-                _file = Path.Combine(dir, "jposbox.log");
+                _file = Path.Combine(dir, "atlasbox.log");
                 FileInfo info = new FileInfo(_file);
                 if (info.Exists && info.Length > 2 * 1024 * 1024)
                 {
