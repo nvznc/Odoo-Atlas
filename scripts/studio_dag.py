@@ -294,7 +294,8 @@ async def run_node(
 
             LOG_DIR.mkdir(parents=True, exist_ok=True)
             log_path = LOG_DIR / f"{node.key}.attempt{attempt}.log"
-            log_path.write_text(stdout + ("\n[stderr]\n" + stderr if stderr else ""), encoding="utf-8")
+            log_text = stdout + ("\n[stderr]\n" + stderr if stderr else "")
+            log_path.write_text(log_text, encoding="utf-8")
 
             if returncode == 0:
                 current.status = "ok"

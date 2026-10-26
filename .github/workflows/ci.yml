@@ -57,6 +57,6 @@ jobs:
             odoo -d odoo_test \
               -i currency_rate_bcv,pos_bcv_multi_currency,pos_kitchen_direct_print,atlas_odoo_studio \
               --test-enable \
-              --test-tags=-atlas_studio_ui \
+              --test-tags=/currency_rate_bcv,/pos_bcv_multi_currency,/pos_kitchen_direct_print,/atlas_odoo_studio,-atlas_studio_ui \
               --log-level=test \
               --stop-after-init
